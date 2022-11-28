@@ -5,6 +5,7 @@ using AElf.Standards.ACS1;
 using AElf.Standards.ACS10;
 using AElf.CSharp.Core;
 using AElf.Sdk.CSharp;
+using AElf.Sdk.CSharp.State;
 using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
@@ -33,27 +34,9 @@ public partial class TokenContract
         var bill = new TransactionFeeBill();
         var allowanceBill = new TransactionFreeFeeAllowanceBill();
 
-        var fromAddress = Context.Sender;
-        var methodFees = Context.Call<MethodFees>(input.ContractAddress, nameof(GetMethodFee),
-            new StringValue {Value = input.MethodName});
-        var successToChargeBaseFee = true;
+        Test(input,ref bill,ref allowanceBill,out var fromAddress,
+            out var freeAllowances,out var successToChargeBaseFee,out var successToChargeSizeFee);
         
-        SetOrRefreshMethodFeeFreeAllowances(fromAddress);
-        var freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
-
-        if (methodFees != null && methodFees.Fees.Any())
-        {
-            // If base fee is set before, charge base fee.
-            successToChargeBaseFee = ChargeBaseFee(GetBaseFeeDictionary(methodFees), ref bill, freeAllowances, ref allowanceBill);
-        }
-
-        var successToChargeSizeFee = true;
-        if (methodFees != null && !methodFees.IsSizeFeeFree)
-        {
-            // If IsSizeFeeFree == true, do not charge size fee.
-            successToChargeSizeFee = ChargeSizeFee(input, ref bill, freeAllowances, ref allowanceBill);
-        }
-
         // Update balances and allowances
         foreach (var (symbol, amount) in bill.FeesMap)
         {
@@ -84,73 +67,51 @@ public partial class TokenContract
         return chargingOutput;
     }
 
-    private void SetOrRefreshMethodFeeFreeAllowances(Address address)
+    private void Test(ChargeTransactionFeesInput input,ref TransactionFeeBill bill, 
+        ref TransactionFreeFeeAllowanceBill allowanceBill,
+        out Address fromAddress,out MethodFeeFreeAllowances freeAllowances,
+        out bool successToChargeBaseFee,out bool successToChargeSizeFee)
     {
-        var config = State.MethodFeeFreeAllowancesConfig.Value;
-        if (config == null || State.Balances[address][Context.Variables.NativeSymbol] < config.Threshold)
-        {
-            // Won't refresh method fee free allowance if inputted address hasn't reach the threshold.
-            return;
-        }
-
-        var lastRefreshTime = State.MethodFeeFreeAllowancesLastRefreshTimeMap[address];
-        if (lastRefreshTime != null && config.RefreshSeconds > (Context.CurrentBlockTime - lastRefreshTime).Seconds)
-        {
-            return;
-        }
-
-        State.MethodFeeFreeAllowancesLastRefreshTimeMap[address] = Context.CurrentBlockTime;
-        State.MethodFeeFreeAllowancesMap[address] = config.FreeAllowances;
-    }
-
-    private Dictionary<string, long> GetBaseFeeDictionary(MethodFees methodFees)
-    {
-        var dict = new Dictionary<string, long>();
-        foreach (var methodFee in methodFees.Fees)
-        {
-            if (dict.ContainsKey(methodFee.Symbol))
-            {
-                dict[methodFee.Symbol] = dict[methodFee.Symbol].Add(methodFee.BasicFee);
-            }
-            else
-            {
-                dict[methodFee.Symbol] = methodFee.BasicFee;
-            }
-        }
-
-        return dict;
-    }
-
-    private bool ChargeBaseFee(Dictionary<string, long> methodFeeMap, ref TransactionFeeBill bill, MethodFeeFreeAllowances freeAllowances, ref TransactionFreeFeeAllowanceBill allowanceBill)
-    {
-        // Fail to charge
-        if (!ChargeFirstSufficientToken(methodFeeMap, out var symbolToChargeBaseFee,
-                out var amountToChargeBaseFee, out var existingBalance, out var existingAllowance, freeAllowances))
-        {
-            Context.LogDebug(() => "Failed to charge first sufficient token.");
-            if (symbolToChargeBaseFee != null)
-            {
-                bill.FeesMap.Add(symbolToChargeBaseFee, existingBalance);
-                allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, existingAllowance);
-            } // If symbol == 
-            
-            return false;
-        }
+        fromAddress = Context.Sender;
+        var methodFees = Context.Call<MethodFees>(input.ContractAddress, nameof(GetMethodFee),
+            new StringValue {Value = input.MethodName});
+        successToChargeBaseFee = true;
         
-        // Succeed to charge, freeAllowance first.
-        if (existingAllowance > amountToChargeBaseFee)
+        SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+        freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+
+        if (methodFees != null && methodFees.Fees.Any())
         {
-            allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, amountToChargeBaseFee);
-            // free fee allowance has covered fee, add 0 for size fee
-            bill.FeesMap.Add(symbolToChargeBaseFee, 0);
+            // If base fee is set before, charge base fee.
+            successToChargeBaseFee = ChargeBaseFee(GetBaseFeeDictionary(methodFees), ref bill, freeAllowances, ref allowanceBill, out fromAddress, State.DelegateesMap[fromAddress]);
         }
-        else
+        successToChargeSizeFee = true;
+        if (methodFees != null && !methodFees.IsSizeFeeFree)
         {
-            allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, existingAllowance);
-            bill.FeesMap.Add(symbolToChargeBaseFee, amountToChargeBaseFee.Sub(existingAllowance));
+            if (fromAddress != Context.Sender)
+            {
+                //
+            }
+            // If IsSizeFeeFree == true, do not charge size fee.
+            successToChargeSizeFee = ChargeSizeFee(input, ref bill, freeAllowances, ref allowanceBill);
         }
 
-        return true;
+        // if (!(successToChargeBaseFee && successToChargeSizeFee) && State.DelegateesMap[fromAddress] != null)
+        // {
+        //     if (methodFees != null && methodFees.Fees.Any())
+        //     {
+        //         bill = new TransactionFeeBill();
+        //         allowanceBill = new TransactionFreeFeeAllowanceBill();
+        //         successToChargeBaseFee = ChargeBaseFee(GetBaseFeeDictionary(methodFees), ref bill, freeAllowances,
+        //             ref allowanceBill, out fromAddress, State.DelegateesMap[fromAddress]);
+        //     }
+        //     if (methodFees != null && !methodFees.IsSizeFeeFree)
+        //     {
+        //         // If IsSizeFeeFree == true, do not charge size fee.
+        //         successToChargeSizeFee = ChargeSizeFee(input, ref bill, freeAllowances, ref allowanceBill, 
+        //             out fromAddress, State.DelegateesMap[fromAddress]);
+        //     }
+        // }
     }
     
     private bool ChargeSizeFee(ChargeTransactionFeesInput input, ref TransactionFeeBill bill, MethodFeeFreeAllowances freeAllowances, ref TransactionFreeFeeAllowanceBill allowanceBill)
@@ -228,7 +189,6 @@ public partial class TokenContract
             chargeAllowanceAmount = availableAllowance;
             chargeAmount = availableBalance;
         }
-
         if (symbolToPayTxFee == null) return availableBalance.Add(availableAllowance) >= txSizeFeeAmount;
 
         if (symbolChargedForBaseFee == symbolToPayTxFee)
@@ -246,6 +206,416 @@ public partial class TokenContract
 
         return availableBalance.Add(availableAllowance) >= txSizeFeeAmount;
     }
+
+
+    private void SetOrRefreshMethodFeeFreeAllowances(Address address)
+    {
+        var config = State.MethodFeeFreeAllowancesConfig.Value;
+        if (config == null || State.Balances[address][Context.Variables.NativeSymbol] < config.Threshold)
+        {
+            // Won't refresh method fee free allowance if inputted address hasn't reach the threshold.
+            return;
+        }
+
+        var lastRefreshTime = State.MethodFeeFreeAllowancesLastRefreshTimeMap[address];
+        if (lastRefreshTime != null && config.RefreshSeconds > (Context.CurrentBlockTime - lastRefreshTime).Seconds)
+        {
+            return;
+        }
+
+        State.MethodFeeFreeAllowancesLastRefreshTimeMap[address] = Context.CurrentBlockTime;
+        State.MethodFeeFreeAllowancesMap[address] = config.FreeAllowances;
+    }
+
+    private Dictionary<string, long> GetBaseFeeDictionary(MethodFees methodFees)
+    {
+        var dict = new Dictionary<string, long>();
+        foreach (var methodFee in methodFees.Fees)
+        {
+            if (dict.ContainsKey(methodFee.Symbol))
+            {
+                dict[methodFee.Symbol] = dict[methodFee.Symbol].Add(methodFee.BasicFee);
+            }
+            else
+            {
+                dict[methodFee.Symbol] = methodFee.BasicFee;
+            }
+        }
+
+        return dict;
+    }
+
+    private bool ChargeBaseFee(Dictionary<string, long> methodFeeMap, ref TransactionFeeBill bill, MethodFeeFreeAllowances freeAllowances, 
+        ref TransactionFreeFeeAllowanceBill allowanceBill, out Address fromAddress, TransactionFeeDelegatees delegatees = null)
+    {
+        // Fail to charge
+        if (!ChargeFirstSufficientToken(methodFeeMap,out var symbolToChargeBaseFee,
+                out var amountToChargeBaseFee, out var existingBalance,
+                out var existingAllowance, freeAllowances, delegatees, out fromAddress))
+        {
+            Context.LogDebug(() => "Failed to charge first sufficient token.");
+            if (symbolToChargeBaseFee != null)
+            {
+                bill.FeesMap.Add(symbolToChargeBaseFee, existingBalance);
+                allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, existingAllowance);
+            } // If symbol == 
+            
+            return false;
+        }
+        
+        // Succeed to charge, freeAllowance first.
+        if (existingAllowance > amountToChargeBaseFee)
+        {
+            allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, amountToChargeBaseFee);
+            // free fee allowance has covered fee, add 0 for size fee
+            bill.FeesMap.Add(symbolToChargeBaseFee, 0);
+        }
+        else
+        {
+            allowanceBill.FreeFeeAllowancesMap.Add(symbolToChargeBaseFee, existingAllowance);
+            bill.FeesMap.Add(symbolToChargeBaseFee, amountToChargeBaseFee.Sub(existingAllowance));
+        }
+
+        return true;
+    }
+    // private bool ChargeSizeFee(ChargeTransactionFeesInput input, ref TransactionFeeBill bill, MethodFeeFreeAllowances freeAllowances, ref TransactionFreeFeeAllowanceBill allowanceBill,TransactionFeeDelegatees transactionFeeDelegatees = null)
+    // {
+    //     string symbolChargedForBaseFee = null;
+    //     var amountChargedForBaseFee = 0L;
+    //     var amountChargedForBaseAllowance = 0L;
+    //     // Size Fee is charged in primary token, aelf.
+    //     var symbolToPayTxFee = State.ChainPrimaryTokenSymbol.Value;
+    //     if (bill.FeesMap.Any())
+    //     {
+    //         symbolChargedForBaseFee = bill.FeesMap.First().Key;
+    //         amountChargedForBaseFee = bill.FeesMap.First().Value;
+    //     }
+    //
+    //     if (allowanceBill.FreeFeeAllowancesMap.Any())
+    //     {
+    //         amountChargedForBaseAllowance = allowanceBill.FreeFeeAllowancesMap.First().Value;
+    //     }
+    //     
+    //     var availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         // Available balance need to deduct amountChargedForBaseFee, if base fee is charged in the same token.
+    //         ? GetBalance(Context.Sender, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //         : GetBalance(Context.Sender, symbolToPayTxFee);
+    //     var availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //         : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //     var txSizeFeeAmount = input.TransactionSizeFee;
+    //     // SymbolsToPayTxSizeFee is set of all available token can be charged, and with the ratio of primary token and another.
+    //     if (input.SymbolsToPayTxSizeFee.Any())
+    //     {
+    //         var allSymbolToTxFee = input.SymbolsToPayTxSizeFee;
+    //         // get 1st Balance + Allowance > size fee, else, get 1st > 0
+    //         var availableSymbol = allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance) >= txSizeFeeAmount) ??
+    //                               allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance) > 0);
+    //         if (availableSymbol != null && availableSymbol.TokenSymbol != symbolToPayTxFee)
+    //         {
+    //             symbolToPayTxFee = availableSymbol.TokenSymbol;
+    //             txSizeFeeAmount = txSizeFeeAmount.Mul(availableSymbol.AddedTokenWeight)
+    //                 .Div(availableSymbol.BaseTokenWeight);
+    //             availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetBalance(Context.Sender, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //                 : GetBalance(Context.Sender, symbolToPayTxFee);
+    //             availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //                 : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //         }
+    //     }
+    //
+    //     // start to charge
+    //     var chargeAmount = 0L;
+    //     var chargeAllowanceAmount = 0L;
+    //     // Balance + Allowance > size fee
+    //     if (availableBalance.Add(availableAllowance) > txSizeFeeAmount)
+    //     {
+    //         // Allowance > size fee, all allowance
+    //         if (availableAllowance > txSizeFeeAmount)
+    //         {
+    //             chargeAllowanceAmount = txSizeFeeAmount;
+    //         }
+    //         else
+    //         {
+    //             // Allowance is not enough
+    //             chargeAllowanceAmount = availableAllowance;
+    //             chargeAmount = txSizeFeeAmount.Sub(chargeAllowanceAmount);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         chargeAllowanceAmount = availableAllowance;
+    //         chargeAmount = availableBalance;
+    //     }
+    //
+    //     if (symbolToPayTxFee == null) return availableBalance.Add(availableAllowance) >= txSizeFeeAmount;
+    //
+    //     if (symbolChargedForBaseFee == symbolToPayTxFee)
+    //     {
+    //         bill.FeesMap[symbolToPayTxFee] =
+    //             bill.FeesMap[symbolToPayTxFee].Add(chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee] =
+    //             allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee].Add(chargeAllowanceAmount);
+    //     }
+    //     else
+    //     {
+    //         bill.FeesMap.Add(symbolToPayTxFee, chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap.Add(symbolToPayTxFee, chargeAllowanceAmount);
+    //     }
+    //
+    //     return availableBalance.Add(availableAllowance) >= txSizeFeeAmount;
+    // }
+
+    // private bool ChargeSizeFee(ChargeTransactionFeesInput input, ref TransactionFeeBill bill,
+    //     MethodFeeFreeAllowances freeAllowances, ref TransactionFreeFeeAllowanceBill allowanceBill,
+    //     out Address fromAddress, TransactionFeeDelegatees delegatees = null)
+    // {
+    //     string symbolChargedForBaseFee = null;
+    //     var amountChargedForBaseFee = 0L;
+    //     var amountChargedForBaseAllowance = 0L;
+    //     // Size Fee is charged in primary token, aelf.
+    //     var symbolToPayTxFee = State.ChainPrimaryTokenSymbol.Value;
+    //     if (bill.FeesMap.Any())
+    //     {
+    //         symbolChargedForBaseFee = bill.FeesMap.First().Key;
+    //         amountChargedForBaseFee = bill.FeesMap.First().Value;
+    //     }
+    //
+    //     if (allowanceBill.FreeFeeAllowancesMap.Any())
+    //     {
+    //         amountChargedForBaseAllowance = allowanceBill.FreeFeeAllowancesMap.First().Value;
+    //     }
+    //     
+    //     if (!CheckChargeFirstSufficient(input, symbolChargedForBaseFee,symbolToPayTxFee,amountChargedForBaseFee,amountChargedForBaseAllowance,delegatees))
+    //     {
+    //         
+    //     }
+    //     if (symbolChargedForBaseFee == symbolToPayTxFee)
+    //     {
+    //         bill.FeesMap[symbolToPayTxFee] =
+    //             bill.FeesMap[symbolToPayTxFee].Add(chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee] =
+    //             allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee].Add(chargeAllowanceAmount);
+    //     }
+    //     else
+    //     {
+    //         bill.FeesMap.Add(symbolToPayTxFee, chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap.Add(symbolToPayTxFee, chargeAllowanceAmount);
+    //     }
+    //     
+    // }
+
+    // private bool CheckChargeFirstSufficient(ChargeTransactionFeesInput input, string symbolChargedForBaseFee,string symbolToPayTxFee,long amountChargedForBaseFee,long amountChargedForBaseAllowance
+    //     ,TransactionFeeDelegatees delegatees,out long availableBalance,out long availableAllowance)
+    // {
+    //     var fromAddress = Context.Sender;
+    //     availableBalance = 0L;
+    //     availableAllowance = 0L;
+    //     var txSizeFeeAmount = GetSufficientBalanceToPayForSizeFee(input,fromAddress,symbolChargedForBaseFee,symbolToPayTxFee,amountChargedForBaseFee,amountChargedForBaseAllowance,
+    //         out availableBalance,out availableAllowance);
+    //     if (availableBalance.Add(availableAllowance) > txSizeFeeAmount) return true;
+    //
+    //     var delegateeAmount = 0L;
+    //     
+    //     if (delegatees != null)
+    //     {
+    //         foreach (var info in delegatees.Delegatees)
+    //         {
+    //             fromAddress = Address.FromBase58(info.Key);
+    //             txSizeFeeAmount = GetSufficientBalanceToPayForSizeFee(input,fromAddress,symbolChargedForBaseFee,symbolToPayTxFee,amountChargedForBaseFee,amountChargedForBaseAllowance,
+    //                 out availableBalance,out availableAllowance);
+    //             delegateeAmount = info.Value.Delegations[symbolToPayTxFee];
+    //             if (availableBalance.Add(availableAllowance) > txSizeFeeAmount && delegateeAmount >= txSizeFeeAmount)
+    //             {
+    //                 return true;
+    //             }
+    //         }
+    //
+    //     }
+    // }
+    // private long GetSufficientBalanceToPayForSizeFee(ChargeTransactionFeesInput input,
+    //     Address fromAddress, string symbolChargedForBaseFee,
+    //     string symbolToPayTxFee,long amountChargedForBaseFee,
+    //     long amountChargedForBaseAllowance,out long availableBalance,out long availableAllowance)
+    // {
+    //     availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         // Available balance need to deduct amountChargedForBaseFee, if base fee is charged in the same token.
+    //         ? GetBalance(fromAddress, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //         : GetBalance(fromAddress, symbolToPayTxFee);
+    //     SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+    //     var freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+    //     
+    //     availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //         : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //     var txSizeFeeAmount = input.TransactionSizeFee;
+    //     // SymbolsToPayTxSizeFee is set of all available token can be charged, and with the ratio of primary token and another.
+    //     if (input.SymbolsToPayTxSizeFee.Any())
+    //     {
+    //         var allSymbolToTxFee = input.SymbolsToPayTxSizeFee;
+    //         // get 1st Balance + Allowance > size fee, else, get 1st > 0
+    //         var availableSymbol = allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance,fromAddress) >= txSizeFeeAmount) ??
+    //                               allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance,fromAddress) > 0);
+    //         if (availableSymbol != null && availableSymbol.TokenSymbol != symbolToPayTxFee)
+    //         {
+    //             symbolToPayTxFee = availableSymbol.TokenSymbol;
+    //             txSizeFeeAmount = txSizeFeeAmount.Mul(availableSymbol.AddedTokenWeight)
+    //                 .Div(availableSymbol.BaseTokenWeight);
+    //             availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetBalance(fromAddress, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //                 : GetBalance(fromAddress, symbolToPayTxFee);
+    //             availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //                 : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //         }
+    //     }
+    //     return txSizeFeeAmount;
+    // }
+    // private bool ChargeSizeFee(ChargeTransactionFeesInput input, ref TransactionFeeBill bill, MethodFeeFreeAllowances freeAllowances, 
+    //     ref TransactionFreeFeeAllowanceBill allowanceBill, TransactionFeeDelegatees delegatees = null)
+    // {
+    //     string symbolChargedForBaseFee = null;
+    //     var amountChargedForBaseFee = 0L;
+    //     var amountChargedForBaseAllowance = 0L;
+    //     Address fromAddress;
+    //
+    //     // Size Fee is charged in primary token, aelf.
+    //     var symbolToPayTxFee = State.ChainPrimaryTokenSymbol.Value;
+    //     if (bill.FeesMap.Any())
+    //     {
+    //         symbolChargedForBaseFee = bill.FeesMap.First().Key;
+    //         amountChargedForBaseFee = bill.FeesMap.First().Value;
+    //     }
+    //
+    //     if (allowanceBill.FreeFeeAllowancesMap.Any())
+    //     {
+    //         amountChargedForBaseAllowance = allowanceBill.FreeFeeAllowancesMap.First().Value;
+    //     }
+    //     
+    //     TransactionFeeDelegations delegations = null;
+    //     var chargeAmount = 0L;
+    //     var chargeAllowanceAmount = 0L;
+    //     var availableBalance = 0L;
+    //     var availableAllowance = 0L;
+    //     if (delegatees != null)
+    //     {
+    //         foreach (var value in delegatees.Delegatees)
+    //         {
+    //             fromAddress = Address.FromBase58(value.Key);
+    //             SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+    //             freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+    //             if (DoChargeSizeFee(input,freeAllowances,fromAddress,amountChargedForBaseFee,amountChargedForBaseAllowance,
+    //                     symbolChargedForBaseFee,symbolToPayTxFee,out chargeAmount,out chargeAllowanceAmount,out availableBalance,out availableAllowance,
+    //                     value.Value))
+    //             {
+    //                 AddToBill(symbolChargedForBaseFee, symbolToPayTxFee, ref bill, ref allowanceBill, chargeAmount,
+    //                     chargeAllowanceAmount);
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     fromAddress = Context.Sender;
+    //     SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+    //     freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+    //     var result = DoChargeSizeFee(input, freeAllowances, fromAddress, amountChargedForBaseFee,
+    //         amountChargedForBaseAllowance,
+    //         symbolChargedForBaseFee, symbolToPayTxFee, out chargeAmount, out chargeAllowanceAmount,
+    //         out availableBalance,out availableAllowance);
+    //     AddToBill(symbolChargedForBaseFee, symbolToPayTxFee, ref bill, ref allowanceBill, chargeAmount,
+    //         chargeAllowanceAmount);
+    //     return result;
+    // }
+    //
+    // private void AddToBill(string symbolChargedForBaseFee,string symbolToPayTxFee,ref TransactionFeeBill bill,ref TransactionFreeFeeAllowanceBill allowanceBill,
+    //     long chargeAmount,long chargeAllowanceAmount)
+    // {
+    //     if (symbolChargedForBaseFee == symbolToPayTxFee)
+    //     {
+    //         bill.FeesMap[symbolToPayTxFee] =
+    //             bill.FeesMap[symbolToPayTxFee].Add(chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee] =
+    //             allowanceBill.FreeFeeAllowancesMap[symbolToPayTxFee].Add(chargeAllowanceAmount);
+    //     }
+    //     else
+    //     {
+    //         bill.FeesMap.Add(symbolToPayTxFee, chargeAmount);
+    //         allowanceBill.FreeFeeAllowancesMap.Add(symbolToPayTxFee, chargeAllowanceAmount);
+    //     }
+    // }
+    //
+    // private bool DoChargeSizeFee(ChargeTransactionFeesInput input, MethodFeeFreeAllowances freeAllowances, 
+    //     Address fromAddress,long amountChargedForBaseFee, long amountChargedForBaseAllowance, string symbolChargedForBaseFee, string symbolToPayTxFee,
+    //     out long chargeAmount, out long chargeAllowanceAmount ,out long availableBalance,out long availableAllowance,TransactionFeeDelegations delegations = null)
+    // {
+    //     availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         // Available balance need to deduct amountChargedForBaseFee, if base fee is charged in the same token.
+    //         ? GetBalance(fromAddress, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //         : GetBalance(fromAddress, symbolToPayTxFee);
+    //     availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //         ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //         : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //     var txSizeFeeAmount = input.TransactionSizeFee;
+    //
+    //     // SymbolsToPayTxSizeFee is set of all available token can be charged, and with the ratio of primary token and another.
+    //     if (input.SymbolsToPayTxSizeFee.Any())
+    //     {
+    //         var allSymbolToTxFee = input.SymbolsToPayTxSizeFee;
+    //         // get 1st Balance + Allowance > size fee, else, get 1st > 0
+    //         var availableSymbol = allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance) >= txSizeFeeAmount) ??
+    //                               allSymbolToTxFee.FirstOrDefault(x =>
+    //                                   GetBalancePlusAllowanceCalculatedBaseOnPrimaryToken(x, symbolChargedForBaseFee,
+    //                                       amountChargedForBaseFee, freeAllowances, amountChargedForBaseAllowance) > 0);
+    //         if (availableSymbol != null && availableSymbol.TokenSymbol != symbolToPayTxFee)
+    //         {
+    //             symbolToPayTxFee = availableSymbol.TokenSymbol;
+    //             txSizeFeeAmount = txSizeFeeAmount.Mul(availableSymbol.AddedTokenWeight)
+    //                 .Div(availableSymbol.BaseTokenWeight);
+    //             availableBalance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetBalance(fromAddress, symbolToPayTxFee).Sub(amountChargedForBaseFee)
+    //                 : GetBalance(fromAddress, symbolToPayTxFee);
+    //             availableAllowance = symbolChargedForBaseFee == symbolToPayTxFee
+    //                 ? GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee).Sub(amountChargedForBaseAllowance)
+    //                 : GetFreeFeeAllowanceAmount(freeAllowances, symbolToPayTxFee);
+    //         }
+    //     }
+    //
+    //     // start to charge
+    //     chargeAmount = 0L;
+    //     chargeAllowanceAmount = 0L;
+    //     // Balance + Allowance > size fee
+    //     if (symbolToPayTxFee != null && availableBalance.Add(availableAllowance) > txSizeFeeAmount &&
+    //         delegations?.Delegations[symbolToPayTxFee] >= txSizeFeeAmount)
+    //     {
+    //         // Allowance > size fee, all allowance
+    //         if (availableAllowance > txSizeFeeAmount)
+    //         {
+    //             chargeAllowanceAmount = txSizeFeeAmount;
+    //         }
+    //         else
+    //         {
+    //             // Allowance is not enough
+    //             chargeAllowanceAmount = availableAllowance;
+    //             chargeAmount = txSizeFeeAmount.Sub(chargeAllowanceAmount);
+    //         }
+    //         return true;
+    //     }
+    //
+    //     chargeAllowanceAmount = availableAllowance;
+    //     chargeAmount = availableBalance;
+    //     
+    //     return false ;
+    // }
 
     public override Empty ChargeResourceToken(ChargeResourceTokenInput input)
     {
@@ -382,39 +752,53 @@ public partial class TokenContract
     /// <param name="amount"></param>
     /// <param name="existingBalance"></param>
     /// <returns></returns>
-    private bool ChargeFirstSufficientToken(Dictionary<string, long> symbolToAmountMap, out string symbol,
-        out long amount, out long existingBalance, out long existingAllowance, MethodFeeFreeAllowances freeAllowances)
+    private bool ChargeFirstSufficientToken(Dictionary<string, long> symbolToAmountMap,out string symbol,
+        out long amount, out long existingBalance, out long existingAllowance,
+        MethodFeeFreeAllowances freeAllowances, TransactionFeeDelegatees delegatees, 
+        out Address fromAddress)
     {
         symbol = null;
         amount = 0L;
         existingBalance = 0L;
         existingAllowance = 0L;
         
-        var fromAddress = Context.Sender;
+        fromAddress = Context.Sender;
         string symbolOfValidBalance = null;
+
+        var delegateeAmount = 0L;
 
         // Traverse available token symbols, check balance one by one
         // until there's balance of one certain token is enough to pay the fee.
-        foreach (var symbolToAmount in symbolToAmountMap)
-        {
-            // current token symbol
-            existingBalance = GetBalance(fromAddress, symbolToAmount.Key);
-            symbol = symbolToAmount.Key;
-            amount = symbolToAmount.Value;
+        GetSufficientBalanceToPayForBaseFee(symbolToAmountMap,fromAddress, out existingBalance, out symbol, out amount, out existingAllowance, freeAllowances,
+            out symbolOfValidBalance);
 
-            // free allowance in current token symbol
-            existingAllowance = GetFreeFeeAllowanceAmount(freeAllowances, symbol);
-            
-            if (existingBalance.Add(existingAllowance) > 0)
-            {
-                symbolOfValidBalance = symbol;
-            }
-
-            if (existingBalance.Add(existingAllowance) >= amount) break;
-        }
-
+        // originExistingBalance = existingBalance;
+        // originExistingAllowance = existingAllowance;
+        
         if (existingBalance.Add(existingAllowance) >= amount) return true;
-
+        
+        if (delegatees != null)
+        {
+            foreach (var info in delegatees.Delegatees)
+            {
+                fromAddress = Address.FromBase58(info.Key);
+                SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+                freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+                GetSufficientBalanceToPayForBaseFee(symbolToAmountMap,fromAddress, out existingBalance,out symbol,out amount,out existingAllowance,freeAllowances,
+                    out symbolOfValidBalance);
+                delegateeAmount = info.Value.Delegations[symbol];
+                if (symbol != null && existingBalance.Add(existingAllowance) >= amount &&
+                    info.Value.Delegations[symbol] >= amount) break;
+            }
+            if (existingBalance.Add(existingAllowance) >= amount && delegateeAmount >= amount)
+            {
+                return true;
+            }
+            fromAddress = Context.Sender;
+            SetOrRefreshMethodFeeFreeAllowances(fromAddress);
+            freeAllowances = CalculateMethodFeeFreeAllowances(fromAddress)?.Clone();
+        }
+        
         var primaryTokenSymbol = GetPrimaryTokenSymbol(new Empty()).Value;
         if (symbolToAmountMap.Keys.Contains(primaryTokenSymbol))
         {
@@ -433,6 +817,35 @@ public partial class TokenContract
         }
 
         return false;
+    }
+
+    private void GetSufficientBalanceToPayForBaseFee(Dictionary<string, long> symbolToAmountMap,
+        Address fromAddress,out long existingBalance,out string symbol,
+        out long amount,out long existingAllowance,MethodFeeFreeAllowances freeAllowances,out string symbolOfValidBalance)
+    {
+        symbol = null;
+        amount = 0L;
+        existingBalance = 0L;
+        existingAllowance = 0L;
+        symbolOfValidBalance = null;
+        
+        foreach (var symbolToAmount in symbolToAmountMap)
+        {
+            // current token symbol
+            existingBalance = GetBalance(fromAddress, symbolToAmount.Key);
+            symbol = symbolToAmount.Key;
+            amount = symbolToAmount.Value;
+
+            // free allowance in current token symbol
+            existingAllowance = GetFreeFeeAllowanceAmount(freeAllowances, symbol);
+            
+            if (existingBalance.Add(existingAllowance) > 0)
+            {
+                symbolOfValidBalance = symbol;
+            }
+
+            if (existingBalance.Add(existingAllowance) >= amount) break;
+        }
     }
 
     public override Empty ClaimTransactionFees(TotalTransactionFeesMap input)

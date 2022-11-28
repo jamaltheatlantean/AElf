@@ -45,6 +45,8 @@ public sealed class AccountServiceTests : AccountTestBase
     }
 
     [Fact]
+    
+    
     public async Task EncryptAndDecryptMessage_Test()
     {
         var stringValue = new StringValue

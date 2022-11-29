@@ -14,6 +14,7 @@ namespace AElf.Contracts.EconomicSystem.Tests.BVT;
 
 public partial class EconomicSystemTest
 {
+    [Fact]
     public async Task Donate_FewELF_Success_Test()
     {
         var account = Accounts[1];
@@ -37,7 +38,8 @@ public partial class EconomicSystemTest
         var treasuryBalance = await GetCurrentTreasuryBalance();
         treasuryBalance.ShouldBeGreaterThanOrEqualTo(50);
     }
-    
+
+    [Fact]
     public async Task Donate_AllELF_Success_Test()
     {
         var account = Accounts[1];
@@ -60,7 +62,8 @@ public partial class EconomicSystemTest
         var treasuryBalance = await GetCurrentTreasuryBalance();
         treasuryBalance.ShouldBeGreaterThanOrEqualTo(100);
     }
-    
+
+    [Fact]
     public async Task Donate_ELF_LessThan_Owned_Test()
     {
         var account = Accounts[1];
@@ -81,7 +84,8 @@ public partial class EconomicSystemTest
         })).Balance;
         userBalance.ShouldBe(50);
     }
-    
+
+    [Fact]
     public async Task Donate_FewOtherToken_Success_Test()
     {
         await InitialBuildConnector(EconomicSystemTestConstants.TransactionFeeChargingContractTokenSymbol);
@@ -124,7 +128,8 @@ public partial class EconomicSystemTest
         var buildConnector = (await TokenConverterContractStub.EnableConnector.SendAsync(tokenInfo)).TransactionResult;
         buildConnector.Status.ShouldBe(TransactionResultStatus.Mined);
     }
-    
+
+    [Fact]
     public async Task Donate_AllOtherToken_Success_Test()
     {
         await InitialBuildConnector(EconomicSystemTestConstants.TransactionFeeChargingContractTokenSymbol);
@@ -145,7 +150,8 @@ public partial class EconomicSystemTest
         })).Balance;
         userBalance.ShouldBe(0);
     }
-    
+
+    [Fact]
     public async Task Donate_OtherToken_LessThan_Owned_Test()
     {
         await InitialBuildConnector(EconomicSystemTestConstants.TransactionFeeChargingContractTokenSymbol);

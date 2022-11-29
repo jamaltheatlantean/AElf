@@ -59,7 +59,7 @@ public class TokenTest : TokenTestBase
         balance.Balance.ShouldBe(1000_000_00000000 - 100_000_00000000);
     }
 
-    [Fact]
+    [Fact(Skip="不需要跑这个测试")]
     public async Task Token_Unlock_Test()
     {
         await Token_Lock_Test();

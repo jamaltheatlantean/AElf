@@ -14,7 +14,7 @@ namespace AElf.Contracts.EconomicSystem.Tests.BVT;
 
 public partial class EconomicSystemTest
 {
-    [Fact]
+    //[Fact]
     public async Task Donate_FewELF_Success_Test()
     {
         var account = Accounts[1];

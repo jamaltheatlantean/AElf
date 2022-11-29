@@ -9,7 +9,7 @@ namespace AElf.Contracts.EconomicSystem.Tests.BVT;
 
 public class ThresholdContractTests : EconomicSystemTestBase
 {
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task MethodCallingThreshold_Test()
     {
         var methodResult = await MethodCallThresholdContractStub.GetMethodCallingThreshold.CallAsync(

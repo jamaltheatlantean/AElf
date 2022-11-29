@@ -21,7 +21,7 @@ public partial class EconomicSystemTest
 
     private Address Tester => Address.FromPublicKey(InitialCoreDataCenterKeyPairs.First().PublicKey);
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Economic_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(EconomicContractAddress, MethodName, new MethodFees
@@ -36,7 +36,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Vote_FeeProvider_Test()
     {
         var registerResult = await VoteContractStub.GetMethodFee.CallAsync(new StringValue
@@ -61,7 +61,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Treasury_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(TreasuryContractAddress, MethodName, new MethodFees
@@ -76,7 +76,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Election_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(ElectionContractAddress, MethodName, new MethodFees
@@ -91,7 +91,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Parliament_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(ParliamentContractAddress, MethodName, new MethodFees
@@ -106,7 +106,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Genesis_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(ContractZeroAddress, MethodName, new MethodFees
@@ -121,7 +121,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task TokenConverter_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(TokenConverterContractAddress, MethodName, new MethodFees
@@ -136,7 +136,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Token_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(TokenContractAddress, MethodName, new MethodFees
@@ -151,7 +151,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task TokenHolder_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(TokenHolderContractAddress, MethodName, new MethodFees
@@ -166,7 +166,7 @@ public partial class EconomicSystemTest
         result.Fees.First().ShouldBe(TokenAmount);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Consensus_FeeProvider_Test()
     {
         await ExecuteProposalForParliamentTransaction(ConsensusContractAddress, MethodName, new MethodFees

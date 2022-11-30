@@ -155,6 +155,7 @@ public partial class EconomicSystemTest
     }
 
     [Fact]
+    
     public async Task Profit_Execute_CreateScheme_Test()
     {
         await Profit_SetMethodFee_Test();

@@ -79,7 +79,7 @@ public partial class EconomicSystemTest
         beforeBalance.ShouldBe(afterBalance + 0 + transactionSize * 0);
     }
 
-    [Fact]
+    [Fact(Skip="不需要跑这个测试")]
     public async Task ChangeMethodFeeController_Test()
     {
         var createOrganizationResult =
@@ -154,7 +154,7 @@ public partial class EconomicSystemTest
         }
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     public async Task Profit_Execute_CreateScheme_Test()
     {
         await Profit_SetMethodFee_Test();

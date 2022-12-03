@@ -67,6 +67,12 @@ jobs:
       assemblyfilters: '-xunit*'
   - script: bash build.sh -target=Upload-Coverage-Azure
     displayName: 'Upload data to Codecov'
+    
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish code coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'
 
 # All tasks on macOS
 - job: build_all_darwin

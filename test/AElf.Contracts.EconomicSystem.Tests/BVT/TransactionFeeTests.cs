@@ -80,6 +80,7 @@ public partial class EconomicSystemTest
     }
 
     [Fact(Skip="不需要跑这个测试")]
+    
     public async Task ChangeMethodFeeController_Test()
     {
         var createOrganizationResult =

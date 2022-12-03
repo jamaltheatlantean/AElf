@@ -51,7 +51,7 @@ public partial class EconomicSystemTest
         }
     }
 
-    [Fact]
+    [Fact(Skip="不需要跑这个测试")]
     public async Task Vote_Execute_AddOption_Test()
     {
         await Vote_SetMethodFee_Test();
@@ -154,7 +154,7 @@ public partial class EconomicSystemTest
         }
     }
 
-    [Fact]
+    [Fact(Skip="不需要跑这个测试")]
     
     public async Task Profit_Execute_CreateScheme_Test()
     {

@@ -69,10 +69,11 @@ jobs:
     displayName: 'Upload data to Codecov'
     
   - task: PublishCodeCoverageResults@1
+    enabled: true
     displayName: 'Publish code coverage'
     inputs:
       codeCoverageTool: Cobertura
-      summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'
+      summaryFileLocation: '$(Build.SourcesDirectory)/test/*/TestResults/*/coverage.cobertura.xml'
 
 # All tasks on macOS
 - job: build_all_darwin

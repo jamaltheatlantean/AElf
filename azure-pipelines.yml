@@ -35,6 +35,13 @@ jobs:
       targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
       reporttypes: 'Cobertura'
       assemblyfilters: '-xunit*'
+      
+  - task: PublishCodeCoverageResults@1
+    enabled: true
+    displayName: 'Publish code coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/test/*/TestResults/*/coverage.cobertura.xml'
   - script: PowerShell.exe -file build.ps1 -target=Upload-Coverage-Azure
     displayName: 'Upload data to Codecov'
 # All tasks on Linux
@@ -107,3 +114,10 @@ jobs:
       assemblyfilters: '-xunit*'
   - script: bash build.sh -target=Upload-Coverage-Azure
     displayName: 'Upload data to Codecov'
+
+  - task: PublishCodeCoverageResults@1
+    enabled: true
+    displayName: 'Publish code coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/test/*/TestResults/*/coverage.cobertura.xml'

@@ -51,8 +51,8 @@ public partial class EconomicSystemTest
         }
     }
 
-    [Fact(Skip="不需要跑这个测试")]
-    public async Task Vote_Execute_AddOption_Test()
+    [Fact]
+    public async Task Vote_Execute_A(Skip="不需要跑这个测试")ddOption_Test()
     {
         await Vote_SetMethodFee_Test();
 
@@ -79,7 +79,7 @@ public partial class EconomicSystemTest
         beforeBalance.ShouldBe(afterBalance + 0 + transactionSize * 0);
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     
     public async Task ChangeMethodFeeController_Test()
     {
@@ -155,7 +155,7 @@ public partial class EconomicSystemTest
         }
     }
 
-    [Fact(Skip="不需要跑这个测试")]
+    [Fact]
     
     public async Task Profit_Execute_CreateScheme_Test()
     {

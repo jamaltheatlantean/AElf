@@ -52,7 +52,7 @@ public partial class EconomicSystemTest
     }
 
     [Fact]
-    public async Task Vote_Execute_A(Skip="不需要跑这个测试")ddOption_Test()
+    public async Task Vote_Execute_AddOption_Test()
     {
         await Vote_SetMethodFee_Test();
 

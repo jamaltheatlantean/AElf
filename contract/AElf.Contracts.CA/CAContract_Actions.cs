@@ -31,7 +31,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
             holderInfo.GuardiansInfo = new GuardiansInfo()
             {
                 Guardians = { input.GuardianApproved },
-                LoginGuradianTpyeIndexes = { 0 }
+                LoginGuardianTypeIndexes = { 0 }
             };
             
             State.HolderInfoMap.Set(holderId, holderInfo);

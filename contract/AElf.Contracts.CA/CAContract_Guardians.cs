@@ -6,7 +6,7 @@ public partial class CAContract
 {
     // TODO
     // Add a Guardian, if already added, return true
-    public Empty AddGuardian(AddGuardianInput input)
+    public override Empty AddGuardian(AddGuardianInput input)
     {
         
         return new Empty();
@@ -14,21 +14,7 @@ public partial class CAContract
 
     // TODO
     // Remove a Guardian, if already removed, return true
-    public Empty RemoveGuardian(RemoveGuardianInput input)
-    {
-        return new Empty();
-    }
-
-    // TODO
-    // Set a GuardianType for login, if already set, return ture
-    public Empty SetGuardianTypeForLogin(SetGuardianTypeForLoginInput input)
-    {
-        return new Empty();
-    }
-
-    // TODO
-    // Set a GuardianType for login, if already unset, return ture
-    public Empty UnsetGuardianTypeForLogin(UnsetGuardianTypeForLoginInput input)
+    public override Empty RemoveGuardian(RemoveGuardianInput input)
     {
         return new Empty();
     }

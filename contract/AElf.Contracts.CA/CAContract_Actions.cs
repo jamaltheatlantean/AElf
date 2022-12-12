@@ -12,7 +12,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public Empty CreateCAHolder(CreateCAHolderInput input)
+    public override Empty CreateCAHolder(CreateCAHolderInput input)
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "CA Protocol can only be created at aelf mainchain.");

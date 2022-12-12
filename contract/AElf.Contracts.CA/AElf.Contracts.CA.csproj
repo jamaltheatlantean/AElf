@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>CA Contracts</Description>
+        <PackageProjectUrl>https://aelf.io</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/AElfProject/AElf/</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ContractCode Include="..\..\protobuf\ca_contract.proto">
+            <Link>Protobuf\Proto\ca_contract.proto</Link>
+        </ContractCode>
+    </ItemGroup>
+</Project>

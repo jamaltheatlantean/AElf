@@ -1,0 +1,102 @@
+/**
+ * CA contract.
+ */
+syntax = "proto3";
+
+package ca;
+
+import "aelf/core.proto";
+import "aelf/options.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "AElf.Contracts.CA";
+
+service CAContract {
+
+  option (aelf.csharp_state) = "AElf.Contracts.CA.CAContractState";
+  
+  // If the guardianType has CAHolder and Manager Address, meaning CAHolder created before, return true;
+  rpc CreateCAHolder (CreateCAHolderInput) returns (CreateCAHolderOutput) {
+  }
+}
+
+message CreateCAHolderInput {
+  Guardian guardian_approved = 1;
+  Manager manager = 2;
+}
+
+message CreateCAHolderOutput {
+  // CA address, for Manager
+  aelf.Address ca_address = 1;
+  // CA hash, for HolderInfo
+  aelf.Hash ca_hash = 2;
+}
+
+message HolderInfo {
+  aelf.Address creator_address = 1;
+  repeated Manager managers = 2;
+  GuardiansInfo guardians_info = 3;
+  // Json Expression for checking
+  string jsonExpression = 4;
+}
+
+message GuardiansInfo {
+  repeated Guardian guardians = 1;
+  repeated int32 login_guradian_tpye_indexes = 2;
+}
+
+message Manager {
+  aelf.Address manager_addresses = 1;
+  string device_string = 2;
+}
+
+message Guardian {
+  GuardianType guardian_type = 1;
+  Verifier verifier = 2;
+}
+
+enum GuardianTypeType {
+  GUARDIAN_TYPE_OF_EMAIL = 0;
+  GUARDIAN_TPYE_OF_PHONE = 1;
+}
+
+message GuardianType {
+  GuardianTypeType type = 1;
+  string guardian_type = 2;
+}
+
+message Verifier {
+  string name = 1;
+  // available in 5 minutes
+  bytes signiture = 2;
+}
+
+message VerifierServer {
+  string name = 1;
+  repeated string endPoints = 2;
+}
+
+message CAServer {
+  string name = 1;
+  string endPoint = 2;
+}
+
+// LogEvent
+message CAHolderCreated {
+  option (aelf.is_event) = true;
+  aelf.Address creator = 1 [(aelf.is_indexed) = true];
+  aelf.Hash ca_has = 2 [(aelf.is_indexed) = true];
+  aelf.Address manager = 3 [(aelf.is_indexed) = true];
+  sint64 device_string = 4;
+}
+
+// LogEvent
+message LoginGuardianTypeAdded {
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
+  aelf.Address ca_address = 2;
+  aelf.Address manager = 3 [(aelf.is_indexed) = true];
+  GuardianType login_guardian_type = 4 [(aelf.is_indexed) = true];
+  repeated GuardianType current_login_guardian_types = 5;
+}

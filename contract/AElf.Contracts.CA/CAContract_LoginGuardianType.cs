@@ -63,7 +63,7 @@ public partial class CAContract
         }
 
         // Remove index from LoginGuradianTpyeIndexes set.
-        holderInfo.GuardiansInfo.LoginGuradianTpyeIndexes.Remove(index);
+        holderInfo.GuardiansInfo.LoginGuardianTypeIndexes.Remove(index);
 
         return new Empty();
     }
@@ -93,7 +93,7 @@ public partial class CAContract
         if (index < guardians.Count)
         {
             // Add the index in array.
-            guardiansInfo.LoginGuradianTpyeIndexes.Add(index);
+            guardiansInfo.LoginGuardianTypeIndexes.Add(index);
         }
     }
 

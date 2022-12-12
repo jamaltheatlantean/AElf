@@ -29,6 +29,9 @@ service CAContract {
 
   // If GuardianType is already unsetted, return true
   rpc UnsetGuardianTypeForLogin (UnsetGuardianTypeForLoginInput) returns (google.protobuf.Empty) {}
+  
+  // as named.
+  rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
 }
 
 message CreateCAHolderInput {

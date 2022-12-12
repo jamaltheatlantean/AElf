@@ -12,7 +12,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public override Empty CreateCAHolder(CreateCAHolderInput input)
+    public Empty CreateCAHolder(CreateCAHolderInput input)
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "CA Protocol can only be created at aelf mainchain.");
@@ -20,7 +20,6 @@ public partial class CAContract : CAContractContainer.CAContractBase
         var guardianType = input.GuardianApproved.GuardianType;
         var holderId = State.LoginGuardianTypeMap[guardianType.GuardianType_];
         var holderInfo = holderId != null ? State.HolderInfoMap[holderId] : new HolderInfo();
-        Address caAddress = new Address();
 
         // If CAHolder doesn't exist
         if (holderId == null)
@@ -29,21 +28,23 @@ public partial class CAContract : CAContractContainer.CAContractBase
 
             holderInfo.CreatorAddress = Context.Sender;
             holderInfo.Managers.Add(input.Manager);
-            caAddress = Context.ConvertVirtualAddressToContractAddress(holderId, Context.Self);
+            holderInfo.GuardiansInfo = new GuardiansInfo()
+            {
+                Guardians = { input.GuardianApproved },
+                LoginGuradianTpyeIndexes = { 0 }
+            };
             
             State.HolderInfoMap.Set(holderId, holderInfo);
             State.LoginGuardianTypeMap.Set(guardianType.GuardianType_, holderId);
-        }
-        // CAHolder exists
-        else
-        {
-            
         }
 
         // Log Event
         Context.Fire(new CAHolderCreated()
         {
-
+            Creator = Context.Sender,
+            CaHash = holderId,
+            Manager = input.Manager.ManagerAddresses,
+            DeviceString = input.Manager.DeviceString
         });
 
         return new Empty();

@@ -1,8 +1,9 @@
-using System.Xml;
+using System.Linq;
+using AElf.Contracts.MultiToken;
 using AElf.Sdk.CSharp;
+using AElf.Types;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
-using Org.BouncyCastle.Asn1.Crmf;
-using Virgil.Crypto.Pfs;
 
 namespace AElf.Contracts.CA;
 
@@ -81,5 +82,51 @@ public partial class CAContract
 
         State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         return new Empty();
+    }
+    
+    public override Empty ManagerForwardCall(ManagerForwardCallInput input)
+    {
+        Assert(input.CaHash != null,"CA hash is null.");
+        CheckManagerPermission(input.CaHash, Context.Sender);
+        Context.SendVirtualInline(input.CaHash,input.ContractAddress,input.MethodName,input.Args);
+        return new Empty();
+    }
+
+    public override Empty ManagerTransfer(ManagerTransferInput input)
+    {
+        Assert(input.CaHash != null, "CA hash is null.");
+        CheckManagerPermission(input.CaHash, Context.Sender);
+        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value, nameof(State.TokenContract.Transfer),
+            new TransferInput
+            {
+                To = input.To,
+                Amount = input.Amount,
+                Symbol = input.Symbol,
+                Memo = input.Memo
+            }.ToByteString());
+        return new Empty();
+    }
+
+    public override Empty ManagerTransferFrom(ManagerTransferFromInput input)
+    {
+        Assert(input.CaHash != null, "CA hash is null.");
+        CheckManagerPermission(input.CaHash, Context.Sender);
+        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value, nameof(State.TokenContract.TransferFrom),
+            new TransferFromInput
+            {
+                From = input.From,
+                To = input.To,
+                Amount = input.Amount,
+                Symbol = input.Symbol,
+                Memo = input.Memo
+            }.ToByteString());
+        return new Empty();
+    }
+    
+    private void CheckManagerPermission(Hash caHash, Address managerAddress)
+    {
+        Assert(State.HolderInfoMap[caHash] != null,"Invalid CA hash.");
+        var managerList = State.HolderInfoMap[caHash].Managers.Select(manager => manager.ManagerAddresses).ToList();
+        Assert(managerList.Contains(managerAddress),"No permission.");
     }
 }

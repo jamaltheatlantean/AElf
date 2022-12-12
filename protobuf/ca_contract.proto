@@ -12,7 +12,6 @@ import "google/protobuf/empty.proto";
 option csharp_namespace = "AElf.Contracts.CA";
 
 service CAContract {
-
   option (aelf.csharp_state) = "AElf.Contracts.CA.CAContractState";
   
   // If the guardianType has CAHolder and Manager Address, meaning CAHolder created before, return true
@@ -29,9 +28,15 @@ service CAContract {
 
   // If GuardianType is already unsetted, return true
   rpc UnsetGuardianTypeForLogin (UnsetGuardianTypeForLoginInput) returns (google.protobuf.Empty) {}
+
+  //Manager call other contracts.
+  rpc ManagerForwardCall (ManagerForwardCallInput) returns (google.protobuf.Empty) {}
   
-  // as named.
-  rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
+  //Manager send transfer transaction.
+  rpc ManagerTransfer (ManagerTransferInput) returns (google.protobuf.Empty){}
+  
+  //Manager send transfer from transaction.
+  rpc ManagerTransferFrom (ManagerTransferFromInput) returns (google.protobuf.Empty){}
   
   // If Manager is already binded, return true
   rpc SocialRecovery (SocialRecoveryInput) returns (google.protobuf.Empty) {}
@@ -41,6 +46,9 @@ service CAContract {
 
   // If the manager is already removed, return true
   rpc RemoveManager (RemoveManagerInput) returns (google.protobuf.Empty) {}
+
+  // as named.
+  rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
 }
 
 message CreateCAHolderInput {
@@ -121,6 +129,39 @@ message SetGuardianTypeForLoginInput {
 message UnsetGuardianTypeForLoginInput {
   aelf.Hash ca_hash = 1;
   GuardianType guardian_type = 2;
+}
+
+message ManagerForwardCallInput {
+  aelf.Hash ca_hash = 1;
+  aelf.Address contract_address = 2;
+  string method_name = 3;
+  bytes args = 4;
+}
+
+message ManagerTransferInput{
+  aelf.Hash ca_hash = 1;
+  // The receiver of the token.
+  aelf.Address to = 2;
+  // The token symbol to transfer.
+  string symbol = 3;
+  // The amount to to transfer.
+  int64 amount = 4;
+  // The memo.
+  string memo = 5;
+}
+
+message ManagerTransferFromInput{
+  aelf.Hash ca_hash = 1;
+  // The source address of the token.
+  aelf.Address from = 2;
+  // The destination address of the token.
+  aelf.Address to = 3;
+  // The symbol of the token to transfer.
+  string symbol = 4;
+  // The amount to transfer.
+  int64 amount = 5;
+  // The memo.
+  string memo = 6;
 }
 
 message GetHolderInfoInput {

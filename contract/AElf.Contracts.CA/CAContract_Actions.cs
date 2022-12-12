@@ -13,7 +13,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
     public override Empty CreateCAHolder(CreateCAHolderInput input)
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
-            "CA Protocol can only be created at aelf mainchain.");
+            "CA Holder can only be created at aelf mainchain.");
         Assert(input == null);
         Assert(input.GuardianApproved.GuardianType.GuardianType_ == null, "GuardianType should not be null");
         var guardianType = input.GuardianApproved.GuardianType;

@@ -1,6 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 
-namespace AElf.Contracts.CA.Protobuf;
+namespace AElf.Contracts.CA;
 
 public partial class CAContract
 {

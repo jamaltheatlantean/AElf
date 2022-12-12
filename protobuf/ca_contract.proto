@@ -128,9 +128,9 @@ message GetHolderInfoOutput{
 message CAHolderCreated {
   option (aelf.is_event) = true;
   aelf.Address creator = 1 [(aelf.is_indexed) = true];
-  aelf.Hash ca_has = 2 [(aelf.is_indexed) = true];
+  aelf.Hash ca_hash = 2 [(aelf.is_indexed) = true];
   aelf.Address manager = 3 [(aelf.is_indexed) = true];
-  sint64 device_string = 4;
+  string device_string = 4;
 }
 
 // LoginGuardianType added

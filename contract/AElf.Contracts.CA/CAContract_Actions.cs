@@ -1,3 +1,4 @@
+using System;
 using AElf.Sdk.CSharp;
 using AElf.Types;
 
@@ -18,6 +19,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
         var guardianType = input.GuardianApproved.GuardianType;
         var holderId = State.LoginGuardianTypeMap[guardianType.GuardianType_];
         var holderInfo = holderId != null ? State.HolderInfoMap[holderId] : new HolderInfo();
+        Address caAddress = new Address();
 
         // If CAHolder doesn't exist
         if (holderId == null)
@@ -25,12 +27,21 @@ public partial class CAContract : CAContractContainer.CAContractBase
             holderId = HashHelper.ConcatAndCompute(Context.TransactionId, Context.PreviousBlockHash);
 
             holderInfo.CreatorAddress = Context.Sender;
+            holderInfo.Managers.Add(input.Manager);
+            caAddress = Context.ConvertVirtualAddressToContractAddress(holderId, Context.Self);
+            
             State.HolderInfoMap.Set(holderId, holderInfo);
+            State.LoginGuardianTypeMap.Set(guardianType.GuardianType_, holderId);
+        }
+        // CAHolder exists
+        else
+        {
+            
         }
 
         var output = new CreateCAHolderOutput()
         {
-            CaAddress = new Address(),
+            CaAddress = caAddress,
             CaHash = holderId
         };
         

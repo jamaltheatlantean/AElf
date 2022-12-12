@@ -5,10 +5,7 @@ syntax = "proto3";
 
 package ca;
 
-import "aelf/core.proto";
 import "aelf/options.proto";
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "AElf.Contracts.CA";
 
@@ -16,9 +13,20 @@ service CAContract {
 
   option (aelf.csharp_state) = "AElf.Contracts.CA.CAContractState";
   
-  // If the guardianType has CAHolder and Manager Address, meaning CAHolder created before, return true;
-  rpc CreateCAHolder (CreateCAHolderInput) returns (CreateCAHolderOutput) {
-  }
+  // If the guardianType has CAHolder and Manager Address, meaning CAHolder created before, return true
+  rpc CreateCAHolder (CreateCAHolderInput) returns (CreateCAHolderOutput) {}
+  
+  // If Guardian is already added, return ture
+  rpc AddGuardian (AddGuardianInput) returns (AddGuardianOutput) {}
+  
+  // If Guardian is already removed, return ture
+  rpc RemoveGuardian (RemoveGuardianInput) returns (RemoveGuardianOutput) {}
+  
+  // If GuardianType is already setted, return true
+  rpc SetGuardianTypeForLogin (SetGuardianTypeForLoginInput) returns (SetGuardianTypeForLoginOutput) {}
+
+  // If GuardianType is already unsetted, return true
+  rpc UnsetGuardianTypeForLogin (UnsetGuardianTypeForLoginInput) returns (UnsetGuardianTypeForLoginOutput) {}
 }
 
 message CreateCAHolderInput {
@@ -66,6 +74,10 @@ message GuardianType {
   string guardian_type = 2;
 }
 
+message CurrentLoginGuardianType {
+  repeated Guardian guardians = 1;
+}
+
 message Verifier {
   string name = 1;
   // available in 5 minutes
@@ -82,7 +94,54 @@ message CAServer {
   string endPoint = 2;
 }
 
+message AddGuardianInput {
+  aelf.Hash ca_hash = 1;
+  Guardian guardian_to_add = 2;
+  repeated Guardian guardians_approved = 3;
+}
+
+message AddGuardianOutput {
+}
+
+message RemoveGuardianInput {
+  aelf.Hash ca_hash = 1;
+  Guardian guardian_to_remove = 2;
+  repeated Guardian guardians_approved = 3;
+}
+
+message RemoveGuardianOutput {
+}
+
+message SetGuardianTypeForLoginInput {
+  aelf.Hash ca_hash = 1;
+  GuardianType guardian_type = 2;
+}
+
+message SetGuardianTypeForLoginOutput {
+}
+
+message UnsetGuardianTypeForLoginInput {
+  aelf.Hash ca_hash = 1;
+  GuardianType guardian_type = 2;
+}
+
+message UnsetGuardianTypeForLoginOutput {
+}
+
+message GetHolderInfoInput {
+  aelf.Hash ca_hash = 1;
+  string login_guardian_type = 2;
+}
+
+message GetHolderInfoOutput{
+  aelf.Hash ca_hash = 1;
+  aelf.Address ca_address = 2;
+  GuardiansInfo guardians_info = 3;
+  // repeated RecoveryCondition conditions = 4;
+}
+
 // LogEvent
+// CAHolder created
 message CAHolderCreated {
   option (aelf.is_event) = true;
   aelf.Address creator = 1 [(aelf.is_indexed) = true];
@@ -91,12 +150,22 @@ message CAHolderCreated {
   sint64 device_string = 4;
 }
 
-// LogEvent
+// LoginGuardianType added
 message LoginGuardianTypeAdded {
   option (aelf.is_event) = true;
   aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
   aelf.Address ca_address = 2;
   aelf.Address manager = 3 [(aelf.is_indexed) = true];
   GuardianType login_guardian_type = 4 [(aelf.is_indexed) = true];
-  repeated GuardianType current_login_guardian_types = 5;
+  CurrentLoginGuardianType current_login_guardian_types = 5;
+}
+
+// LoginGuardianType removed
+message LoginGuardianTypeRemoved {
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
+  aelf.Address ca_address = 2;
+  aelf.Address manager = 3 [(aelf.is_indexed) = true];
+  GuardianType login_guardian_type = 4 [(aelf.is_indexed) = true];
+  CurrentLoginGuardianType current_login_guardian_types = 5;
 }

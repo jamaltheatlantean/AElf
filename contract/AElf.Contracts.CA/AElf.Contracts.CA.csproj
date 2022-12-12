@@ -22,4 +22,8 @@
             <Link>Protobuf\Proto\ca_contract.proto</Link>
         </ContractCode>
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    </ItemGroup>
 </Project>

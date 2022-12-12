@@ -23,12 +23,12 @@ public partial class CAContractState : ContractState
     ///  Verifier list
     /// only on MainChain
     /// </summary>
-    public VerifierServer[] VerifiersServers { get; set; }
+    public MappedState<string, VerifierServer> VerifiersServers { get; set; }
 
     /// <summary>
     ///  CAServer list
     /// only on MainChain
     /// </summary>
-    public CAServer[] CaServers;
+    public MappedState<string, CAServer> CaServers { get; set; }
 
 }

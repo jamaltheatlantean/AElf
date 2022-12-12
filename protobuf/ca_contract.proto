@@ -32,6 +32,15 @@ service CAContract {
   
   // as named.
   rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
+  
+  // If Manager is already binded, return true
+  rpc SocialRecovery (SocialRecoveryInput) returns (google.protobuf.Empty) {}
+  
+  // If the manager is already exists, return true
+  rpc AddManager (AddManagerInput) returns (google.protobuf.Empty) {}
+
+  // If the manager is already removed, return true
+  rpc RemoveManager (RemoveManagerInput) returns (google.protobuf.Empty) {}
 }
 
 message CreateCAHolderInput {
@@ -123,7 +132,23 @@ message GetHolderInfoOutput{
   aelf.Hash ca_hash = 1;
   aelf.Address ca_address = 2;
   GuardiansInfo guardians_info = 3;
-  // repeated RecoveryCondition conditions = 4;
+  // TODO repeated RecoveryCondition conditions = 4;
+}
+
+message SocialRecoveryInput {
+  GuardianType login_guardian_type = 1;
+  repeated Guardian guardians_approved = 2;
+  Manager manager = 3;
+}
+
+message AddManagerInput {
+  aelf.Hash ca_hash = 1;
+  Manager manager = 2;
+}
+
+message RemoveManagerInput {
+  aelf.Hash ca_hash = 1;
+  Manager manager = 2;
 }
 
 // LogEvent
@@ -160,6 +185,30 @@ message LoginGuardianTypeAdded {
   aelf.Address manager = 3 [(aelf.is_indexed) = true];
   GuardianType login_guardian_type = 4 [(aelf.is_indexed) = true];
   CurrentLoginGuardianType current_login_guardian_types = 5;
+}
+
+// SocialRecovery
+message ManagerSocialRecovered {
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
+  aelf.Address manager = 2 [(aelf.is_indexed) = true];
+  string device_string = 3;
+}
+
+// Manager added
+message ManagerAdded {
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
+  aelf.Address manager = 2 [(aelf.is_indexed) = true];
+  string device_string = 3;
+}
+
+// Manager removed
+message ManagerRemoved {
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1 [(aelf.is_indexed) = true];
+  aelf.Address manager = 2 [(aelf.is_indexed) = true];
+  string device_string = 3;
 }
 
 // LoginGuardianType removed

@@ -1,32 +1,35 @@
+using Google.Protobuf.WellKnownTypes;
+
 namespace AElf.Contracts.CA.Protobuf;
 
 public partial class CAContract
 {
     // TODO
     // Add a Guardian, if already added, return true
-    public AddGuardianOutput AddGuardian(AddGuardianInput input)
+    public Empty AddGuardian(AddGuardianInput input)
     {
-        return new AddGuardianOutput();
+        
+        return new Empty();
     }
 
     // TODO
     // Remove a Guardian, if already removed, return true
-    public RemoveGuardianOutput RemoveGuardian(RemoveGuardianInput input)
+    public Empty RemoveGuardian(RemoveGuardianInput input)
     {
-        return new RemoveGuardianOutput();
+        return new Empty();
     }
 
     // TODO
     // Set a GuardianType for login, if already set, return ture
-    public SetGuardianTypeForLoginOutput SetGuardianTypeForLogin(SetGuardianTypeForLoginInput input)
+    public Empty SetGuardianTypeForLogin(SetGuardianTypeForLoginInput input)
     {
-        return new SetGuardianTypeForLoginOutput();
+        return new Empty();
     }
 
     // TODO
     // Set a GuardianType for login, if already unset, return ture
-    public UnsetGuardianTypeForLoginOutput UnsetGuardianTypeForLogin(UnsetGuardianTypeForLoginInput input)
+    public Empty UnsetGuardianTypeForLogin(UnsetGuardianTypeForLoginInput input)
     {
-        return new UnsetGuardianTypeForLoginOutput();
+        return new Empty();
     }
 }

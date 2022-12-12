@@ -1,6 +1,7 @@
 using System;
 using AElf.Sdk.CSharp;
 using AElf.Types;
+using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
 
@@ -11,7 +12,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public override CreateCAHolderOutput CreateCAHolder(CreateCAHolderInput input)
+    public override Empty CreateCAHolder(CreateCAHolderInput input)
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "CA Protocol can only be created at aelf mainchain.");
@@ -39,18 +40,12 @@ public partial class CAContract : CAContractContainer.CAContractBase
             
         }
 
-        var output = new CreateCAHolderOutput()
-        {
-            CaAddress = caAddress,
-            CaHash = holderId
-        };
-        
         // Log Event
         Context.Fire(new CAHolderCreated()
         {
 
         });
 
-        return output;
+        return new Empty();
     }
 }

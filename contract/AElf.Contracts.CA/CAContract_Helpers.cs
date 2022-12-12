@@ -9,7 +9,7 @@ public partial class CAContract
         return true;
     }
 
-    private Address getCAAddress(Hash virtualAddress, Address contractAddress)
+    private Address CalculateCaAddress(Hash virtualAddress, Address contractAddress)
     {
         return Context.ConvertVirtualAddressToContractAddress(virtualAddress, contractAddress);
     }

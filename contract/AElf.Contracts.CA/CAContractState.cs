@@ -18,6 +18,7 @@ public partial class CAContractState : ContractState
     /// </summary>
     public MappedState<Hash, HolderInfo> HolderInfoMap { get; set; }
     public SingletonState<Address> Admin { get; set; }
+    
 
     /// <summary>
     ///  Verifier list

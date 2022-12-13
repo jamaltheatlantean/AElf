@@ -41,6 +41,17 @@ service CAContract {
 
   // If the manager is already removed, return true
   rpc RemoveManager (RemoveManagerInput) returns (google.protobuf.Empty) {}
+  
+  // If End Points already exists, return true
+  rpc AddVerifierServerEndPoints (AddVerifierServerEndPointsInput) returns (google.protobuf.Empty) {}
+
+  // If End Points does not exists, return true
+  rpc RemoveVerifierServerEndPoints (RemoveVerifierServerEndPointsInput) returns (google.protobuf.Empty) {}
+  
+  // if Verifier Server does not exists, return true
+  rpc RemoveVerifierServer (RemoveVerifierServerInput) returns (google.protobuf.Empty) {}
+  
+  rpc GetVerifierServers (GetVerifierServersInput) returns (GetVerifierServersOutput) {option (aelf.is_view) = true;}
 }
 
 message CreateCAHolderInput {
@@ -101,6 +112,14 @@ message CAServer {
   string endPoint = 2;
 }
 
+message VerifierServerList {
+  repeated VerifierServer veriFierServers = 1;
+}
+
+message CAServerList {
+  repeated CAServer caServers = 1;
+}
+
 message AddGuardianInput {
   aelf.Hash ca_hash = 1;
   Guardian guardian_to_add = 2;
@@ -149,6 +168,32 @@ message AddManagerInput {
 message RemoveManagerInput {
   aelf.Hash ca_hash = 1;
   Manager manager = 2;
+}
+
+message AddVerifierServerEndPointsInput {
+  // If not exists, add; If does, insert
+  string name = 1;
+  // Add all, ingnore if has duplicates
+  repeated string endPoints = 2;
+}
+
+message RemoveVerifierServerInput {
+  // If not exists, add; If does, insert
+  string name = 1;
+}
+
+message RemoveVerifierServerEndPointsInput {
+  // If not exists, ignore
+  string name = 1;
+  // Remove all, ingnore if do not exist
+  repeated string endPoints = 2;
+}
+
+message GetVerifierServersInput {
+}
+
+message GetVerifierServersOutput {
+  repeated VerifierServer verifierServers = 1;
 }
 
 // LogEvent
@@ -219,4 +264,22 @@ message LoginGuardianTypeRemoved {
   aelf.Address manager = 3 [(aelf.is_indexed) = true];
   GuardianType login_guardian_type = 4 [(aelf.is_indexed) = true];
   CurrentLoginGuardianType current_login_guardian_types = 5;
+}
+
+// VerifierServerEndPoints added
+message VerifierServerEndPointsAdded {
+  option (aelf.is_event) = true;
+  VerifierServer verifierServer = 1 [(aelf.is_indexed) = true];
+}
+
+// VerifierServerEndPoints removed
+message VerifierServerEndPointsRemoved {
+  option (aelf.is_event) = true;
+  VerifierServer verifierServer = 1 [(aelf.is_indexed) = true];
+}
+
+// VerifierServer removed
+message VerifierServerRemoved {
+  option (aelf.is_event) = true;
+  VerifierServer verifierServer = 1 [(aelf.is_indexed) = true];
 }

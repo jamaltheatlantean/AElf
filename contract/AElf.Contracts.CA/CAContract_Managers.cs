@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AElf.Contracts.MultiToken;
 using AElf.Sdk.CSharp;
@@ -55,7 +56,7 @@ public partial class CAContract
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be added at aelf mainchain.");
         Assert(input == null);
-        Assert(State.HolderInfoMap[input.CaHash] != null, "CA Holder does not exist");
+        CheckManagerInput(input.CaHash, input.Manager);
 
         // Manager already exists
         if (State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
@@ -72,7 +73,7 @@ public partial class CAContract
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be removed at aelf mainchain.");
         Assert(input == null);
-        Assert(State.HolderInfoMap[input.CaHash] != null, "CA Holder does not exist");
+        CheckManagerInput(input.CaHash, input.Manager);
         
         // Manager does not exist
         if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
@@ -82,6 +83,14 @@ public partial class CAContract
 
         State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         return new Empty();
+    }
+
+    private void CheckManagerInput(Hash hash, Manager manager)
+    {
+        Assert(hash == null);
+        Assert(State.HolderInfoMap[hash] != null, "Invalid CA hash.");
+        Assert(manager == null);
+        Assert(String.IsNullOrEmpty(manager.DeviceString) || manager.ManagerAddresses == null);
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)

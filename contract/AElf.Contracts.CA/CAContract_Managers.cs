@@ -54,7 +54,7 @@ public partial class CAContract
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be added at aelf mainchain.");
-        Assert(input != null, "input should not be null");
+        Assert(input == null);
         Assert(State.HolderInfoMap[input.CaHash] != null, "CA Holder does not exist");
 
         // Manager already exists
@@ -71,7 +71,7 @@ public partial class CAContract
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be removed at aelf mainchain.");
-        Assert(input != null, "input should not be null");
+        Assert(input == null);
         Assert(State.HolderInfoMap[input.CaHash] != null, "CA Holder does not exist");
         
         // Manager does not exist

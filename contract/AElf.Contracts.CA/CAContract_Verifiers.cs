@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using AElf.Sdk.CSharp;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -8,7 +11,41 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to add VerifierServerEndPoints");
-        Assert(input != null);
+        Assert(input == null);
+        Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
+        Assert(input.EndPoints == null || input.EndPoints.Count == 0);
+        
+        var server = State.VerifiersServerList.Value.VeriFierServers
+            .FirstOrDefault(server => server.Name == input.Name);
+
+        if (server == null)
+        {
+            State.VerifiersServerList.Value.VeriFierServers.Add(new VerifierServer()
+            {
+                Name = input.Name,
+                EndPoints = { input.EndPoints }
+            });
+        }
+        else
+        {
+            foreach (var endPoint in input.EndPoints)
+            {
+                if (!server.EndPoints.Contains(endPoint))
+                {
+                    server.EndPoints.Add(endPoint);
+                }
+            }
+        }
+        
+        Context.Fire(new VerifierServerEndPointsAdded()
+        {
+            VerifierServer = new VerifierServer()
+            {
+                Name = input.Name,
+                EndPoints = { input.EndPoints }
+            }
+        });
+        
         return new Empty();
     }
 
@@ -16,6 +53,32 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to remove VerifierServerEndPoints");
+        Assert(input == null);
+        Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
+        Assert(input.EndPoints == null || input.EndPoints.Count == 0);
+        
+        var server = State.VerifiersServerList.Value.VeriFierServers
+            .FirstOrDefault(server => server.Name == input.Name);
+        if (server != null)
+        {
+            foreach (var endPoints in input.EndPoints)
+            {
+                if (server.EndPoints.Contains(endPoints))
+                {
+                    server.EndPoints.Remove(endPoints);
+                }
+            }
+        }
+        
+        Context.Fire(new VerifierServerEndPointsRemoved()
+        {
+            VerifierServer = new VerifierServer()
+            {
+                Name = input.Name,
+                EndPoints = { input.EndPoints }
+            }
+        });
+        
         return new Empty();
     }
 
@@ -23,11 +86,29 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to remove VerifierServer");
+        Assert(input == null);
+        Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
+        
+        var server = State.VerifiersServerList.Value.VeriFierServers
+            .FirstOrDefault(server => server.Name == input.Name);
+        if (server != null)
+        {
+            State.VerifiersServerList.Value.VeriFierServers.Remove(server);
+        }
+        
+        Context.Fire(new VerifierServerRemoved()
+        {
+            VerifierServer = server
+        });
+        
         return new Empty();
     }
 
     public override GetVerifierServersOutput GetVerifierServers(GetVerifierServersInput input)
     {
-        var output = new GetVerifierServersOutput();
+        return new GetVerifierServersOutput()
+        {
+            VerifierServers = { State.VerifiersServerList.Value.VeriFierServers }
+        };
     }
 }

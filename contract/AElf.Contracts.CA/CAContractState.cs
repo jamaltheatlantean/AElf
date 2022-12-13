@@ -31,5 +31,4 @@ public partial class CAContractState : ContractState
     /// only on MainChain
     /// </summary>
     public SingletonState<CAServerList> CaServerList { get; set; }
-
 }

@@ -46,9 +46,6 @@ service CAContract {
 
   // If the manager is already removed, return true
   rpc RemoveManager (RemoveManagerInput) returns (google.protobuf.Empty) {}
-
-  // as named.
-  rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
   
   // If End Points already exists, return true
   rpc AddVerifierServerEndPoints (AddVerifierServerEndPointsInput) returns (google.protobuf.Empty) {}
@@ -58,8 +55,17 @@ service CAContract {
   
   // if Verifier Server does not exists, return true
   rpc RemoveVerifierServer (RemoveVerifierServerInput) returns (google.protobuf.Empty) {}
+
+  rpc AddCAServer (AddCAServerInput) returns (google.protobuf.Empty){}
+
+  rpc RemoveCAServer (RemoveCAServerInput) returns (google.protobuf.Empty){}
+
+  // as named.
+  rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
   
   rpc GetVerifierServers (GetVerifierServersInput) returns (GetVerifierServersOutput) {option (aelf.is_view) = true;}
+
+  rpc GetCAServers (google.protobuf.Empty) returns (GetCAServersOutput) {option (aelf.is_view) = true;}
 }
 
 message CreateCAHolderInput {
@@ -121,7 +127,7 @@ message CAServer {
 }
 
 message VerifierServerList {
-  repeated VerifierServer veriFierServers = 1;
+  repeated VerifierServer verifierServers = 1;
 }
 
 message CAServerList {
@@ -230,11 +236,24 @@ message RemoveVerifierServerEndPointsInput {
   repeated string endPoints = 2;
 }
 
+message AddCAServerInput{
+  string name = 1; 
+  string endPoints = 2;
+}
+
+message RemoveCAServerInput {
+  string name = 1;
+}
+
 message GetVerifierServersInput {
 }
 
 message GetVerifierServersOutput {
   repeated VerifierServer verifierServers = 1;
+}
+
+message GetCAServersOutput {
+  repeated CAServer caServers = 1;
 }
 
 // LogEvent

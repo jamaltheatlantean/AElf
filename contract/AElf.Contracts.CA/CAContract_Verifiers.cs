@@ -15,12 +15,12 @@ public partial class CAContract
         Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
         Assert(input.EndPoints == null || input.EndPoints.Count == 0);
         
-        var server = State.VerifiersServerList.Value.VeriFierServers
+        var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
 
         if (server == null)
         {
-            State.VerifiersServerList.Value.VeriFierServers.Add(new VerifierServer()
+            State.VerifiersServerList.Value.VerifierServers.Add(new VerifierServer()
             {
                 Name = input.Name,
                 EndPoints = { input.EndPoints }
@@ -57,7 +57,7 @@ public partial class CAContract
         Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
         Assert(input.EndPoints == null || input.EndPoints.Count == 0);
         
-        var server = State.VerifiersServerList.Value.VeriFierServers
+        var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
         if (server != null)
         {
@@ -89,11 +89,11 @@ public partial class CAContract
         Assert(input == null);
         Assert(input.Name == null || String.IsNullOrEmpty(input.Name));
         
-        var server = State.VerifiersServerList.Value.VeriFierServers
+        var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
         if (server != null)
         {
-            State.VerifiersServerList.Value.VeriFierServers.Remove(server);
+            State.VerifiersServerList.Value.VerifierServers.Remove(server);
         }
         
         Context.Fire(new VerifierServerRemoved()
@@ -108,7 +108,7 @@ public partial class CAContract
     {
         return new GetVerifierServersOutput()
         {
-            VerifierServers = { State.VerifiersServerList.Value.VeriFierServers }
+            VerifierServers = { State.VerifiersServerList.Value.VerifierServers }
         };
     }
 }

@@ -1,4 +1,3 @@
-using AElf.Cryptography;
 using AElf.Sdk.CSharp;
 using Google.Protobuf.WellKnownTypes;
 
@@ -27,7 +26,8 @@ public partial class CAContract
             Assert(State.HolderInfoMap[input.CaHash].GuardiansInfo.Guardians.Contains(guardian),
                 $"Guardian does not exist in the holder.Guardian type:{guardian.GuardianType}");
             //TODO：Verify the signature.
-            //CryptoHelper.RecoverPublicKey(guardian.Verifier.Signature.ToByteArray(),)
+            // CryptoHelper.RecoverPublicKey(guardian.Verifier.Signature.ToByteArray(), HashHelper.ComputeFrom("aaa").ToByteArray(),
+            //     out var pubkey);
         }
         
         return new Empty();

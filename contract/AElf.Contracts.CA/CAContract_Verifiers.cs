@@ -12,7 +12,7 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to add VerifierServerEndPoints");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         Assert(input.EndPoints == null || input.EndPoints.Count == 0);
         
@@ -54,7 +54,7 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to remove VerifierServerEndPoints");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         Assert(input.EndPoints == null || input.EndPoints.Count == 0);
         
@@ -87,7 +87,7 @@ public partial class CAContract
     {
         Assert(Context.Sender.Equals(State.Admin.Value), 
             "Only Admin has permission to remove VerifierServer");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         
         var server = State.VerifiersServerList.Value.VerifierServers
@@ -115,6 +115,6 @@ public partial class CAContract
 
     private void CheckVerifierServerInputName(string name)
     {
-        Assert(name == null || String.IsNullOrEmpty(name));
+        Assert(name != null && !String.IsNullOrEmpty(name), "invalid input name");
     }
 }

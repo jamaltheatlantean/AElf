@@ -15,9 +15,10 @@ public partial class CAContract
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Social Recovery can only be acted at aelf mainchain.");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         
-        Assert(input.LoginGuardianType == null || string.IsNullOrEmpty(input.LoginGuardianType.GuardianType_));
+        Assert(input.LoginGuardianType != null && !string.IsNullOrEmpty(input.LoginGuardianType.GuardianType_), 
+            "invalid input login guardian type");
         var loginGuardianType = input.LoginGuardianType;
         var caHash = State.LoginGuardianTypeMap[loginGuardianType.GuardianType_];
 
@@ -34,13 +35,12 @@ public partial class CAContract
             throw new AssertionException("Verification error");
         }
             
-        // Manager already exists
-        if (holder.Managers.Contains(input.Manager))
+        // Manager does not exists
+        if (!holder.Managers.Contains(input.Manager))
         {
-            return new Empty();
+            State.HolderInfoMap[caHash].Managers.Add(input.Manager);
         }
-        State.HolderInfoMap[caHash].Managers.Add(input.Manager);
-
+        
         Context.Fire(new ManagerSocialRecovered()
         {
             CaHash = caHash,
@@ -55,16 +55,22 @@ public partial class CAContract
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be added at aelf mainchain.");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         CheckManagerInput(input.CaHash, input.Manager);
 
-        // Manager already exists
-        if (State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
+        // Manager does not exists
+        if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
-            return new Empty();
+            State.HolderInfoMap[input.CaHash].Managers.Add(input.Manager);
         }
         
-        State.HolderInfoMap[input.CaHash].Managers.Add(input.Manager);
+        Context.Fire(new ManagerAdded
+        {
+            CaHash = input.CaHash,
+            Manager = input.Manager.ManagerAddresses,
+            DeviceString = input.Manager.DeviceString
+        });
+        
         return new Empty();
     }
 
@@ -72,25 +78,31 @@ public partial class CAContract
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "Manager can only be removed at aelf mainchain.");
-        Assert(input == null);
+        Assert(input != null, "invalid input");
         CheckManagerInput(input.CaHash, input.Manager);
         
-        // Manager does not exist
+        // Manager exists
         if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
-            return new Empty();
+            State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         }
+        
+        Context.Fire(new ManagerRemoved
+        {
+            CaHash = input.CaHash,
+            Manager = input.Manager.ManagerAddresses,
+            DeviceString = input.Manager.DeviceString
+        });
 
-        State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         return new Empty();
     }
 
     private void CheckManagerInput(Hash hash, Manager manager)
     {
-        Assert(hash == null);
+        Assert(hash != null, "invalid input CaHash");
         Assert(State.HolderInfoMap[hash] != null, "Invalid CA hash.");
-        Assert(manager == null);
-        Assert(String.IsNullOrEmpty(manager.DeviceString) || manager.ManagerAddresses == null);
+        Assert(manager != null, "invalid input manager");
+        Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddresses != null, "invalid input manager");
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)

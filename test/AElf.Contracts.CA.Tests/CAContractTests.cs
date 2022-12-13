@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AElf.Contracts.CA;
 
-public class CAContractTests : CAContractTestBase
+public partial class CAContractTests : CAContractTestBase
 {
     [Fact]
     public async Task CreateHolderTest()

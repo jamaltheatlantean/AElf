@@ -34,7 +34,7 @@ public partial class CAContract
             throw new AssertionException("Verification error");
         }
             
-        // Manager doesn't exist
+        // Manager already exists
         if (holder.Managers.Contains(input.Manager))
         {
             return new Empty();

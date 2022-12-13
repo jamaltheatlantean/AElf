@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
+        <PackageId>AElf.Contracts.CA</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>CA Contracts</Description>
         <PackageProjectUrl>https://aelf.io</PackageProjectUrl>

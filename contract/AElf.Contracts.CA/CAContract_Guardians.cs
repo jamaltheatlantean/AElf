@@ -1,3 +1,4 @@
+using System.Linq;
 using AElf.Sdk.CSharp;
 using Google.Protobuf.WellKnownTypes;
 
@@ -23,12 +24,13 @@ public partial class CAContract
         //TODO:Whether the approved guardians count is satisfied.
         foreach (var guardian in input.GuardiansApproved)
         {
-            Assert(State.HolderInfoMap[input.CaHash].GuardiansInfo.Guardians.Contains(guardian),
-                $"Guardian does not exist in the holder.Guardian type:{guardian.GuardianType}");
+            // Assert(State.HolderInfoMap[input.CaHash].GuardiansInfo.Guardians.Select(g=>g.GuardianType).ToList().Contains(guardian.GuardianType),
+            //     $"Guardian does not exist in the holder.Guardian type:{guardian.GuardianType}");
             //TODO：Verify the signature.
             // CryptoHelper.RecoverPublicKey(guardian.Verifier.Signature.ToByteArray(), HashHelper.ComputeFrom("aaa").ToByteArray(),
             //     out var pubkey);
         }
+        State.HolderInfoMap[input.CaHash].GuardiansInfo.Guardians.Add(input.GuardianToAdd);
         
         return new Empty();
     }

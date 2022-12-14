@@ -343,3 +343,13 @@ message VerifierServerRemoved {
   option (aelf.is_event) = true;
   VerifierServer verifierServer = 1 [(aelf.is_indexed) = true];
 }
+
+message CAServerAdded {
+  option (aelf.is_event) = true;
+  CAServer ca_sever_added = 1;
+}
+
+message CAServerRemoved {
+  option (aelf.is_event) = true;
+  CAServer ca_server_removed = 1;
+}

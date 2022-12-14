@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.Parliament;
 using AElf.ContractTestBase.ContractTestKit;
 using AElf.Cryptography.ECDSA;
 using AElf.Types;
+using Volo.Abp.Threading;
 
 namespace AElf.Contracts.CA;
 
@@ -10,6 +12,7 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
 {
     internal ParliamentContractImplContainer.ParliamentContractImplStub ParliamentContractStub;
     internal CAContractContainer.CAContractStub CaContractStub { get; set; }
+    internal CAContractContainer.CAContractStub CaContractStubManager1 { get; set; }
     internal TokenContractContainer.TokenContractStub TokenContractStub { get; set; }
     
     protected ECKeyPair DefaultKeyPair => Accounts[0].KeyPair;
@@ -33,8 +36,10 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     {
         CaContractAddress = SystemContractAddresses[CaContractName];
         CaContractStub = GetCaContractTester(DefaultKeyPair);
+        CaContractStubManager1 = GetCaContractTester(User1KeyPair);
         ParliamentContractStub = GetParliamentContractTester(DefaultKeyPair);
         TokenContractStub = GetTokenContractTester(DefaultKeyPair);
+        AsyncHelper.RunSync(CreateNativeTokenAsync);
     }
 
     
@@ -54,6 +59,28 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     {
         return GetTester<TokenContractContainer.TokenContractStub>(TokenContractAddress,
             keyPair);
+    }
+    
+    private TokenInfo NativeTokenInfo => new()
+    {
+        Symbol = "ELF",
+        TokenName = "Native token",
+        TotalSupply = 10_00000000_00000000,
+        Decimals = 8,
+        IsBurnable = true,
+        Issuer = DefaultAddress
+    };
+    private async Task CreateNativeTokenAsync()
+    {
+        await TokenContractStub.Create.SendAsync(new MultiToken.CreateInput
+        {
+            Symbol = NativeTokenInfo.Symbol,
+            TokenName = NativeTokenInfo.TokenName,
+            TotalSupply = NativeTokenInfo.TotalSupply,
+            Decimals = NativeTokenInfo.Decimals,
+            Issuer = NativeTokenInfo.Issuer,
+            IsBurnable = NativeTokenInfo.IsBurnable
+        });
     }
     
 }

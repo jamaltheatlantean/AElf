@@ -12,6 +12,8 @@ public partial class CAContract : CAContractContainer.CAContractBase
     {
         Assert(!State.Initialized.Value,"Already initialized.");
         State.Admin.Value = input.ContractAdmin ?? Context.Sender;
+        State.TokenContract.Value =
+            Context.GetContractAddressByName(SmartContractConstants.TokenContractSystemName);
         State.Initialized.Value = true;
         return new Empty();
     }

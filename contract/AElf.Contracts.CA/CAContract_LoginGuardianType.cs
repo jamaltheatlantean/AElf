@@ -12,18 +12,18 @@ public partial class CAContract
     // Set a GuardianType for login, if already set, return ture
     public override Empty SetGuardianTypeForLogin(SetGuardianTypeForLoginInput input)
     {
-        Assert(input == null);
-        Assert(input.CaHash == null); 
+        Assert(input != null);
+        Assert(input.CaHash != null); 
         // GuardianType should be valid, not null, and be with non-null GuardianType_
-        Assert(input.GuardianType == null
-            || input.GuardianType != null && String.IsNullOrEmpty(input.GuardianType.GuardianType_));
+        Assert(input.GuardianType != null); 
+        Assert(!String.IsNullOrEmpty(input.GuardianType.GuardianType_));
         
         HolderInfo holderInfo = State.HolderInfoMap[input.CaHash];
         string loginGuardianType = input.GuardianType.GuardianType_;
 
         var isOccupied = CheckLoginGuardianIsNotOccupied(loginGuardianType, input.CaHash);
         
-        Assert(isOccupied == CAContractConstants.LoginGuardianTypeIsOccupiedByOthers, 
+        Assert(isOccupied != CAContractConstants.LoginGuardianTypeIsOccupiedByOthers, 
             $"The login guardian type --{loginGuardianType}-- is occupied by others!");
 
         // for idempotent
@@ -32,7 +32,7 @@ public partial class CAContract
             return new Empty();
         }
         
-        Assert(isOccupied != CAContractConstants.LoginGuardianTypeIsNotOccupied,
+        Assert(isOccupied == CAContractConstants.LoginGuardianTypeIsNotOccupied,
             "Internal error, how can it be?");
         
         FindGuardianTypeAndSet(holderInfo.GuardiansInfo, input.GuardianType);
@@ -43,11 +43,11 @@ public partial class CAContract
     // Unset a GuardianType for login, if already unset, return ture
     public override Empty UnsetGuardianTypeForLogin(UnsetGuardianTypeForLoginInput input)
     {
-        Assert(input == null);
-        Assert(input.CaHash == null); 
+        Assert(input != null);
+        Assert(input.CaHash != null); 
         // GuardianType should be valid, not null, and be with non-null GuardianType_
-        Assert(input.GuardianType == null
-               || input.GuardianType != null && String.IsNullOrEmpty(input.GuardianType.GuardianType_));
+        Assert(input.GuardianType != null);
+        Assert(!String.IsNullOrEmpty(input.GuardianType.GuardianType_));
         
         HolderInfo holderInfo = State.HolderInfoMap[input.CaHash];
         string loginGuardianType = input.GuardianType.GuardianType_;

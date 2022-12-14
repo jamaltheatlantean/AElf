@@ -27,11 +27,7 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     protected Address VerifierAddress => Accounts[4].Address;
     protected Address VerifierAddress1  => Accounts[5].Address;
 
-    protected Verifier Verifier => new Verifier
-    {
-        Name = "huobi"
-    };
-
+    
     protected Hash CaContractName => HashHelper.ComputeFrom("AElf.ContractNames.CA");
     protected Address CaContractAddress { get; set; }
     

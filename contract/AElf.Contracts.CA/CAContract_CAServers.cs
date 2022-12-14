@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using AElf.Sdk.CSharp;
+using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -10,7 +11,9 @@ public partial class CAContract
     public override Empty AddCAServer(AddCAServerInput input)
     {
         Assert(Context.Sender == State.Admin.Value,"No permission.");
-        Assert(String.IsNullOrEmpty(input.Name) && input.EndPoints != null,"Invalid input.");
+        Assert(!String.IsNullOrEmpty(input.Name) && !String.IsNullOrEmpty(input.EndPoints),"Invalid input.");
+        Assert(input.Name != "" && input.EndPoints != "","Invalid input.");
+        State.CaServerList.Value ??= new CAServerList();
         var existServer = State.CaServerList.Value.CaServers.FirstOrDefault(s => s.Name == input.Name);
         if (existServer != null)
         {
@@ -38,7 +41,7 @@ public partial class CAContract
     public override Empty RemoveCAServer(RemoveCAServerInput input)
     {
         Assert(Context.Sender == State.Admin.Value,"No permission.");
-        Assert(input.Name != null,"Invalid input.");
+        Assert(!String.IsNullOrEmpty(input.Name),"Invalid input.");
         var existServer = State.CaServerList.Value.CaServers.FirstOrDefault(s => s.Name == input.Name);
         if (existServer == null) return new Empty();
         State.CaServerList.Value.CaServers.Remove(existServer);

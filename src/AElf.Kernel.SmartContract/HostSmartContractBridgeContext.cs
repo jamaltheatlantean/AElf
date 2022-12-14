@@ -12,6 +12,7 @@ using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Threading;
 
@@ -189,6 +190,11 @@ public class HostSmartContractBridgeContext : IHostSmartContractBridgeContext, I
     public byte[] RecoverPublicKeyWithArgs(byte[] signature, byte[] hash)
     {
         return RecoverPublicKey(signature, hash);
+    }
+    
+    public Dictionary<string, object> DeserializeJsonToDictionary(string json)
+    {
+        return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
     }
 
     public T Call<T>(Address fromAddress, Address toAddress, string methodName, ByteString args)

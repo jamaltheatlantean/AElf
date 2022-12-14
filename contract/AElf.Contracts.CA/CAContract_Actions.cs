@@ -1,7 +1,5 @@
 using System;
 using AElf.Sdk.CSharp;
-using AElf.Sdk.CSharp.State;
-using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -12,6 +10,8 @@ public partial class CAContract : CAContractContainer.CAContractBase
     {
         Assert(!State.Initialized.Value,"Already initialized.");
         State.Admin.Value = input.ContractAdmin ?? Context.Sender;
+        State.TokenContract.Value =
+            Context.GetContractAddressByName(SmartContractConstants.TokenContractSystemName);
         State.Initialized.Value = true;
         return new Empty();
     }
@@ -33,6 +33,9 @@ public partial class CAContract : CAContractContainer.CAContractBase
         var guardianType = input.GuardianApproved.GuardianType;
         var holderId = State.LoginGuardianTypeMap[guardianType.GuardianType_];
         var holderInfo = holderId != null ? State.HolderInfoMap[holderId] : new HolderInfo();
+        
+        string json = "{\"opr\":\"?:\", \"left\":{\"opr\":\"?:\"}}";
+        JsonExpressionCalculate(json);
         
         // if CAHolder does not exist
         if (holderId == null)

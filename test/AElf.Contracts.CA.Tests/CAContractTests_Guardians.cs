@@ -100,6 +100,7 @@ public partial class CAContractTests
             },
             GuardiansApproved = {guardianApprove}
         };
+        await CaContractStub.AddGuardian.SendAsync(input);
         {
             var holderInfo = await CaContractStub.GetHolderInfo.CallAsync(new GetHolderInfoInput
             {

@@ -8,9 +8,10 @@ public partial class CAContract
 {
     public override GetHolderInfoOutput GetHolderInfo(GetHolderInfoInput input)
     {
-        Assert(input == null);
+        Assert(input != null, "input cannot be null!");
         // CaHash and loginGuardianType cannot be invalid at same time.
-        Assert(input.CaHash == null && String.IsNullOrEmpty(input.LoginGuardianType));
+        Assert(!(input.CaHash == null && String.IsNullOrEmpty(input.LoginGuardianType)), 
+            $"CaHash is null, and loginGuardianType is empty: {input.CaHash}, {input.LoginGuardianType}");
 
         GetHolderInfoOutput output = new GetHolderInfoOutput();
         HolderInfo holderInfo = null;
@@ -18,7 +19,7 @@ public partial class CAContract
         {
             // use ca_hash to get holderInfo
             holderInfo = State.HolderInfoMap[input.CaHash];
-            Assert(holderInfo == null, 
+            Assert(holderInfo != null, 
                 $"Bad ca_hash, {input.CaHash}");
 
             output.CaHash = input.CaHash;
@@ -27,11 +28,11 @@ public partial class CAContract
         {
             // use loginGuardianType to get holderInfo
             var caHash = State.LoginGuardianTypeMap[input.LoginGuardianType];
-            Assert(caHash == null, 
+            Assert(caHash != null, 
                 $"Not found ca_hash by a the loginGuardianType {input.LoginGuardianType}.");
 
             holderInfo = State.HolderInfoMap[caHash];
-            Assert(holderInfo == null, 
+            Assert(holderInfo != null, 
                 $"Bad ca_hash, {caHash}");
 
             output.CaHash = caHash;

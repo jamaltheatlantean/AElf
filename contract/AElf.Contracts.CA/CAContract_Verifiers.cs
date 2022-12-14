@@ -15,12 +15,14 @@ public partial class CAContract
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         Assert(input.EndPoints != null && input.EndPoints.Count != 0, "invalid input EndPoints");
+        
         if (State.VerifiersServerList.Value == null)
         {
             State.VerifiersServerList.Value = new VerifierServerList();
         }
-
-        var server = State.VerifiersServerList.Value.VerifierServers
+        
+        var verifierServerList = State.VerifiersServerList.Value;
+        var server = verifierServerList.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
 
         if (server == null)
@@ -61,7 +63,7 @@ public partial class CAContract
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         Assert(input.EndPoints != null && input.EndPoints.Count != 0, "invalid input EndPoints");
-        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
+        if (State.VerifiersServerList.Value == null) return new Empty();
         
         var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
@@ -94,7 +96,7 @@ public partial class CAContract
             "Only Admin has permission to remove VerifierServer");
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
-        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
+        if (State.VerifiersServerList.Value == null) return new Empty();
         
         var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
@@ -113,11 +115,15 @@ public partial class CAContract
 
     public override GetVerifierServersOutput GetVerifierServers(GetVerifierServersInput input)
     {
-        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
-        return new GetVerifierServersOutput()
+        var output = new GetVerifierServersOutput();
+        var verifierServerList = State.VerifiersServerList.Value;
+        
+        if (verifierServerList != null)
         {
-            VerifierServers = { State.VerifiersServerList.Value.VerifierServers }
-        };
+            output.VerifierServers.Add(verifierServerList.VerifierServers);
+        }
+
+        return output;
     }
 
     private void CheckVerifierServerInputName(string name)

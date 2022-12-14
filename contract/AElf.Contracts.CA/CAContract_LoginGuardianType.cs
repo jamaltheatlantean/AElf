@@ -93,7 +93,11 @@ public partial class CAContract
         if (index < guardians.Count)
         {
             // Add the index in array.
-            guardiansInfo.LoginGuardianTypeIndexes.Add(index);
+            // To be idempotent.
+            if (!guardiansInfo.LoginGuardianTypeIndexes.Contains(index))
+            {
+                guardiansInfo.LoginGuardianTypeIndexes.Add(index);
+            }
         }
     }
 

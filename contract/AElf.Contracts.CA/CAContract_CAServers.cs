@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AElf.Sdk.CSharp;
 using Google.Protobuf.WellKnownTypes;
@@ -9,7 +10,7 @@ public partial class CAContract
     public override Empty AddCAServer(AddCAServerInput input)
     {
         Assert(Context.Sender == State.Admin.Value,"No permission.");
-        Assert(input.Name != null && input.EndPoints != null,"Invalid input.");
+        Assert(String.IsNullOrEmpty(input.Name) && input.EndPoints != null,"Invalid input.");
         var existServer = State.CaServerList.Value.CaServers.FirstOrDefault(s => s.Name == input.Name);
         if (existServer != null)
         {

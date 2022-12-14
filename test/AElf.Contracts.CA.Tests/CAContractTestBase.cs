@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Text;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.Parliament;
 using AElf.ContractTestBase.ContractTestKit;
@@ -20,6 +22,11 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     protected Address User1Address => Accounts[1].Address;
     protected Address User2Address => Accounts[2].Address;
     protected Address User3Address => Accounts[3].Address;
+
+    protected Verifier Verifier => new Verifier
+    {
+        Name = "huobi"
+    };
 
     protected Hash CaContractName => HashHelper.ComputeFrom("AElf.ContractNames.CA");
     protected Address CaContractAddress { get; set; }

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using AElf.Types;
+using Google.Protobuf.Collections;
 using Shouldly;
 using Xunit;
 
@@ -99,6 +100,27 @@ public partial class CAContractTests : CAContractTestBase
         
         executionResult.Value.ShouldContain("Not found ca_hash by a the loginGuardianType");
     }
+    
+    [Fact]
+    public async Task SetLoginGuardianType_Succeed_Test()
+    {
+        var caHash = await CreateAHolder_AndGetCash_Helper();
+        
+        var getHolderInfoOutput = await CaContractStub.GetHolderInfo.SendAsync(new GetHolderInfoInput
+        {
+            CaHash = caHash,
+            LoginGuardianType = "1@google.com"
+        });
+
+        var guardiansInfo = getHolderInfoOutput.Output.GuardiansInfo;
+        var guardians = guardiansInfo.Guardians;
+        guardians.Count.ShouldBe(1);
+        guardians[0].GuardianType.Type.ShouldBe(GuardianTypeType.GuardianTypeOfEmail);
+        guardians[0].GuardianType.GuardianType_.ShouldBe("1@google.com");
+        
+        guardiansInfo.LoginGuardianTypeIndexes.Count.ShouldBe(1);
+        guardiansInfo.LoginGuardianTypeIndexes.Contains(0);
+    }
 
     private async Task CreateAHolder_Helper()
     {
@@ -110,6 +132,11 @@ public partial class CAContractTests : CAContractTestBase
                 {
                     GuardianType_ = "1@google.com",
                     Type = 0
+                },
+                Verifier = new Verifier
+                {
+                    Name = "Huobi",
+                    Signature = ""
                 }
             },
             Manager = new Manager
@@ -120,18 +147,44 @@ public partial class CAContractTests : CAContractTestBase
         });
     }
 
-    // private async Task AddAGuardian_Helper()
-    // {
-    //     await CaContractStub.AddGuardian.SendAsync(new AddGuardianInput
-    //     {
-    //         GuardiansApproved = new Guardian
-    //         {
-    //             GuardianType = new GuardianType
-    //             {
-    //                 GuardianType_ = "1@google.com",
-    //                 Type = 0
-    //             }
-    //         }
-    //     });
-    // }
+    private async Task<Hash> CreateAHolder_AndGetCash_Helper()
+    {
+        await CreateAHolder_Helper();
+
+        // cannot get caHash directly，for caHash is created internelly
+        var getHolderInfoOutput = await CaContractStub.GetHolderInfo.SendAsync(new GetHolderInfoInput
+        {
+            CaHash = null,
+            LoginGuardianType = "1@google.com"
+        });
+
+        var caHash = getHolderInfoOutput.Output.CaHash;
+        return caHash;
+    }
+
+    private async Task AddAGuardian_Helper(Hash caHash)
+    {
+        await CaContractStub.AddGuardian.SendAsync(new AddGuardianInput
+        {
+            CaHash = caHash,
+            GuardianToAdd = new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = "2@google.com",
+                    Type = 0
+                },
+                Verifier = Verifier
+            },
+            GuardiansApproved = new RepeatedField<Guardian>().Add(new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = "1@google.com",
+                    Type = 0
+                },
+                Verifier = Verifier
+            }
+        });
+    }
 }

@@ -14,6 +14,8 @@ option csharp_namespace = "AElf.Contracts.CA";
 service CAContract {
   option (aelf.csharp_state) = "AElf.Contracts.CA.CAContractState";
   
+  rpc Initialize(InitializeInput) returns (google.protobuf.Empty){}
+  
   // If the guardianType has CAHolder and Manager Address, meaning CAHolder created before, return true
   rpc CreateCAHolder (CreateCAHolderInput) returns (google.protobuf.Empty) {}
   
@@ -66,6 +68,10 @@ service CAContract {
   rpc GetVerifierServers (GetVerifierServersInput) returns (GetVerifierServersOutput) {option (aelf.is_view) = true;}
 
   rpc GetCAServers (google.protobuf.Empty) returns (GetCAServersOutput) {option (aelf.is_view) = true;}
+}
+
+message InitializeInput{
+  aelf.Address contract_admin = 1;
 }
 
 message CreateCAHolderInput {
@@ -198,7 +204,8 @@ message GetHolderInfoOutput{
   aelf.Hash ca_hash = 1;
   aelf.Address ca_address = 2;
   GuardiansInfo guardians_info = 3;
-  // TODO repeated RecoveryCondition conditions = 4;
+  repeated Manager managers = 4;
+  // TODO repeated RecoveryCondition conditions = 5;
 }
 
 message SocialRecoveryInput {

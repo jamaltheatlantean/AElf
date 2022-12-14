@@ -4,6 +4,7 @@ using AElf.Kernel.SmartContract;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using Org.BouncyCastle.Crypto;
 
 namespace AElf.Sdk.CSharp;
 
@@ -103,6 +104,24 @@ public class CSharpSmartContractContext : ISmartContractBridgeContext
     public byte[] RecoverPublicKey()
     {
         return SmartContractBridgeContextImplementation.RecoverPublicKey();
+    }
+
+    /// <summary>
+    ///     Recovers the public key of the transaction Sender with custom args.
+    /// </summary>
+    /// <returns>A byte array representing the public key.</returns>
+    public byte[] RecoverPublicKeyWithArgs(byte[] signature, byte[] hash)
+    {
+        return SmartContractBridgeContextImplementation.RecoverPublicKeyWithArgs(signature, hash);
+    }
+
+    /// <summary>
+    ///     Deserialize Json string to Dictionary(string, object)
+    /// </summary>
+    /// <returns>Dictionary(string, object)</returns>
+    public Dictionary<string, object> DeserializeJsonToDictionary(string json)
+    {
+        return SmartContractBridgeContextImplementation.DeserializeJsonToDictionary(json);
     }
 
     /// <summary>

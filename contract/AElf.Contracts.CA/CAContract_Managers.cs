@@ -80,10 +80,11 @@ public partial class CAContract
             "Manager can only be removed at aelf mainchain.");
         Assert(input != null, "invalid input");
         CheckManagerInput(input.CaHash, input.Manager);
-        
+
         // Manager exists
-        if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
+        if (State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
+            Assert(Context.Sender.Equals(input.Manager.ManagerAddresses), "No permission to remove");
             State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         }
         
@@ -100,16 +101,18 @@ public partial class CAContract
     private void CheckManagerInput(Hash hash, Manager manager)
     {
         Assert(hash != null, "invalid input CaHash");
-        Assert(State.HolderInfoMap[hash] != null, "Invalid CA hash.");
+        CheckManagerPermission(hash, Context.Sender);
         Assert(manager != null, "invalid input manager");
         Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddresses != null, "invalid input manager");
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)
     {
-        Assert(input.CaHash != null,"CA hash is null.");
+        Assert(input.CaHash != null, "CA hash is null.");
+        Assert(input.ContractAddress != null && !String.IsNullOrEmpty(input.MethodName) && !input.Args.IsEmpty,
+            "Invalid input.");
         CheckManagerPermission(input.CaHash, Context.Sender);
-        Context.SendVirtualInline(input.CaHash,input.ContractAddress,input.MethodName,input.Args);
+        Context.SendVirtualInline(input.CaHash, input.ContractAddress, input.MethodName, input.Args);
         return new Empty();
     }
 
@@ -117,7 +120,9 @@ public partial class CAContract
     {
         Assert(input.CaHash != null, "CA hash is null.");
         CheckManagerPermission(input.CaHash, Context.Sender);
-        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value, nameof(State.TokenContract.Transfer),
+        Assert(input.To != null && !String.IsNullOrEmpty(input.Symbol), "Invalid input.");
+        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value,
+            nameof(State.TokenContract.Transfer),
             new TransferInput
             {
                 To = input.To,
@@ -132,7 +137,10 @@ public partial class CAContract
     {
         Assert(input.CaHash != null, "CA hash is null.");
         CheckManagerPermission(input.CaHash, Context.Sender);
-        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value, nameof(State.TokenContract.TransferFrom),
+        Assert(input.From != null && input.To != null && !String.IsNullOrEmpty(input.Symbol), 
+            "Invalid input.");
+        Context.SendVirtualInline(input.CaHash, State.TokenContract.Value, 
+            nameof(State.TokenContract.TransferFrom),
             new TransferFromInput
             {
                 From = input.From,
@@ -143,11 +151,11 @@ public partial class CAContract
             }.ToByteString());
         return new Empty();
     }
-    
+
     private void CheckManagerPermission(Hash caHash, Address managerAddress)
     {
-        Assert(State.HolderInfoMap[caHash] != null,"Invalid CA hash.");
+        Assert(State.HolderInfoMap[caHash] != null, $"CA holder is null.CA hash:{caHash}");
         var managerList = State.HolderInfoMap[caHash].Managers.Select(manager => manager.ManagerAddresses).ToList();
-        Assert(managerList.Contains(managerAddress),"No permission.");
+        Assert(managerList.Contains(managerAddress), "No permission.");
     }
 }

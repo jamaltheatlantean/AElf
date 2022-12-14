@@ -25,25 +25,6 @@ public partial class CAContractTests : CAContractTestBase
                 DeviceString = "123"
             }
         });
-        {
-            var executionResult = await CaContractStub.CreateCAHolder.SendWithExceptionAsync(new CreateCAHolderInput
-            {
-                GuardianApproved = new Guardian
-                {
-                    GuardianType = new GuardianType
-                    {
-                        GuardianType_ = "1@google.com",
-                        Type = 0
-                    }
-                },
-                Manager = new Manager
-                {
-                    ManagerAddresses = User1Address,
-                    DeviceString = "123"
-                }
-            });
-            executionResult.TransactionResult.Error.ShouldContain("...");
-        }
     }
 
     [Fact]

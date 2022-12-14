@@ -21,8 +21,9 @@ public partial class CAContract
             holderInfo = State.HolderInfoMap[input.CaHash];
             Assert(holderInfo != null, 
                 $"Bad ca_hash, {input.CaHash}");
-
+            
             output.CaHash = input.CaHash;
+            output.Managers.AddRange(holderInfo.Managers.Clone());
         }
         else
         {
@@ -36,6 +37,7 @@ public partial class CAContract
                 $"Bad ca_hash, {caHash}");
 
             output.CaHash = caHash;
+            output.Managers.AddRange(holderInfo.Managers.Clone());
         }
 
         output.CaAddress = Address.FromPublicKey(Context.Self.Value.Concat(output.CaHash.Value.ToByteArray().ComputeHash()).ToArray());

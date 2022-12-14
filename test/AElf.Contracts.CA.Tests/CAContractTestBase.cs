@@ -10,6 +10,8 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
 {
     internal ParliamentContractImplContainer.ParliamentContractImplStub ParliamentContractStub;
     internal CAContractContainer.CAContractStub CaContractStub { get; set; }
+    
+    internal CAContractContainer.CAContractStub CaContractUser1Stub { get; set; }
     internal TokenContractContainer.TokenContractStub TokenContractStub { get; set; }
     
     protected ECKeyPair DefaultKeyPair => Accounts[0].KeyPair;
@@ -33,6 +35,7 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     {
         CaContractAddress = SystemContractAddresses[CaContractName];
         CaContractStub = GetCaContractTester(DefaultKeyPair);
+        CaContractUser1Stub = GetCaContractTester(User1KeyPair);
         ParliamentContractStub = GetParliamentContractTester(DefaultKeyPair);
         TokenContractStub = GetTokenContractTester(DefaultKeyPair);
     }

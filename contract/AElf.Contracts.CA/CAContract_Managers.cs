@@ -101,10 +101,9 @@ public partial class CAContract
     private void CheckManagerInput(Hash hash, Manager manager)
     {
         Assert(hash != null, "invalid input CaHash");
-        Assert(State.HolderInfoMap[hash] != null, "Invalid CA hash.");
+        CheckManagerPermission(hash, Context.Sender);
         Assert(manager != null, "invalid input manager");
         Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddresses != null, "invalid input manager");
-        CheckManagerPermission(hash, manager.ManagerAddresses);
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)

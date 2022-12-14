@@ -1,4 +1,5 @@
 using System.Linq;
+using AElf.Sdk.CSharp;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -22,6 +23,14 @@ public partial class CAContract
                 EndPoint = input.EndPoints
             });
         }
+        Context.Fire(new CAServerAdded
+        {
+            CaSeverAdded = new CAServer
+            {
+                Name = input.Name,
+                EndPoint = input.EndPoints
+            }
+        });
         return new Empty();
     }
 
@@ -30,10 +39,12 @@ public partial class CAContract
         Assert(Context.Sender == State.Admin.Value,"No permission.");
         Assert(input.Name != null,"Invalid input.");
         var existServer = State.CaServerList.Value.CaServers.FirstOrDefault(s => s.Name == input.Name);
-        if (existServer != null)
+        if (existServer == null) return new Empty();
+        State.CaServerList.Value.CaServers.Remove(existServer);
+        Context.Fire(new CAServerRemoved
         {
-            State.CaServerList.Value.CaServers.Remove(existServer);
-        }
+            CaServerRemoved = existServer
+        });
         return new Empty();
     }
 

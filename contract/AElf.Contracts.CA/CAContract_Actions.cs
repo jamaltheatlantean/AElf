@@ -1,5 +1,7 @@
 using System;
 using AElf.Sdk.CSharp;
+using AElf.Sdk.CSharp.State;
+using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -16,7 +18,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "CA Holder can only be created at aelf mainchain.");
         Assert(input != null, "invalid input");
-        Assert(input.GuardianApproved.GuardianType != null 
+        Assert(input.GuardianApproved  != null && input.GuardianApproved.GuardianType != null 
                && !String.IsNullOrEmpty(input.GuardianApproved.GuardianType.GuardianType_), 
             "invalid input guardian type");
         Assert(input.Manager != null, "invalid input manager");
@@ -37,10 +39,9 @@ public partial class CAContract : CAContractContainer.CAContractBase
                 LoginGuardianTypeIndexes = { 0 }
             };
             
-            State.HolderInfoMap.Set(holderId, holderInfo);
-            State.LoginGuardianTypeMap.Set(guardianType.GuardianType_, holderId);
+            State.HolderInfoMap[holderId] = holderInfo;
+            State.LoginGuardianTypeMap[guardianType.GuardianType_] = holderId;
         }
-        
         // Log Event
         Context.Fire(new CAHolderCreated
         {

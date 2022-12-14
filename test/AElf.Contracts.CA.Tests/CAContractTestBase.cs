@@ -19,9 +19,13 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     protected ECKeyPair User1KeyPair => Accounts[1].KeyPair;
     protected ECKeyPair User2KeyPair => Accounts[2].KeyPair;
     protected ECKeyPair User3KeyPair => Accounts[3].KeyPair;
+    protected ECKeyPair VerifierKeyPair => Accounts[4].KeyPair;
+    protected ECKeyPair VerifierKeyPair1 => Accounts[5].KeyPair;
     protected Address User1Address => Accounts[1].Address;
     protected Address User2Address => Accounts[2].Address;
     protected Address User3Address => Accounts[3].Address;
+    protected Address VerifierAddress => Accounts[4].Address;
+    protected Address VerifierAddress1  => Accounts[5].Address;
 
     protected Verifier Verifier => new Verifier
     {

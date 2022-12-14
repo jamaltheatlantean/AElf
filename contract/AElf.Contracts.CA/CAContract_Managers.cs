@@ -80,10 +80,11 @@ public partial class CAContract
             "Manager can only be removed at aelf mainchain.");
         Assert(input != null, "invalid input");
         CheckManagerInput(input.CaHash, input.Manager);
-        
+
         // Manager exists
-        if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
+        if (State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
+            Assert(Context.Sender.Equals(input.Manager.ManagerAddresses), "No permission to remove");
             State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
         }
         
@@ -103,6 +104,7 @@ public partial class CAContract
         Assert(State.HolderInfoMap[hash] != null, "Invalid CA hash.");
         Assert(manager != null, "invalid input manager");
         Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddresses != null, "invalid input manager");
+        CheckManagerPermission(hash, manager.ManagerAddresses);
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)

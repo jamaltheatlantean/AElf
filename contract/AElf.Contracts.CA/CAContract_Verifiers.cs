@@ -14,8 +14,12 @@ public partial class CAContract
             "Only Admin has permission to add VerifierServerEndPoints");
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
-        Assert(input.EndPoints == null || input.EndPoints.Count == 0);
-        
+        Assert(input.EndPoints != null && input.EndPoints.Count != 0, "invalid input EndPoints");
+        if (State.VerifiersServerList.Value == null)
+        {
+            State.VerifiersServerList.Value = new VerifierServerList();
+        }
+
         var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
 
@@ -56,7 +60,8 @@ public partial class CAContract
             "Only Admin has permission to remove VerifierServerEndPoints");
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
-        Assert(input.EndPoints == null || input.EndPoints.Count == 0);
+        Assert(input.EndPoints != null && input.EndPoints.Count != 0, "invalid input EndPoints");
+        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
         
         var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
@@ -89,6 +94,7 @@ public partial class CAContract
             "Only Admin has permission to remove VerifierServer");
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
+        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
         
         var server = State.VerifiersServerList.Value.VerifierServers
             .FirstOrDefault(server => server.Name == input.Name);
@@ -107,6 +113,7 @@ public partial class CAContract
 
     public override GetVerifierServersOutput GetVerifierServers(GetVerifierServersInput input)
     {
+        Assert(State.VerifiersServerList != null, "No VerifierServer exist");
         return new GetVerifierServersOutput()
         {
             VerifierServers = { State.VerifiersServerList.Value.VerifierServers }

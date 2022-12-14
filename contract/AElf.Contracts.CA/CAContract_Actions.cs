@@ -8,6 +8,14 @@ namespace AElf.Contracts.CA;
 
 public partial class CAContract : CAContractContainer.CAContractBase
 {
+    public override Empty Initialize(InitializeInput input)
+    {
+        Assert(!State.Initialized.Value,"Already initialized.");
+        State.Admin.Value = input.ContractAdmin ?? Context.Sender;
+        State.Initialized.Value = true;
+        return new Empty();
+    }
+
     /// <summary>
     ///     The Create method can only be executed in aelf MainChain.
     /// </summary>

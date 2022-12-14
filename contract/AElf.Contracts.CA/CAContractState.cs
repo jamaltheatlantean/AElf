@@ -5,6 +5,7 @@ namespace AElf.Contracts.CA;
 
 public partial class CAContractState : ContractState
 {
+    public SingletonState<bool> Initialized { get; set; }
     /// <summary>
     /// Login Guardian Type -> HolderInfo Hash
     /// multiple Login Guardian Type to one HolderInfo Hash

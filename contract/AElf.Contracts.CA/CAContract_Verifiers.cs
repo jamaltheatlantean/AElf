@@ -15,7 +15,7 @@ public partial class CAContract
         Assert(input != null, "invalid input");
         CheckVerifierServerInputName(input.Name);
         Assert(input.EndPoints != null && input.EndPoints.Count != 0, "invalid input EndPoints");
-        
+
         if (State.VerifiersServerList.Value == null)
         {
             State.VerifiersServerList.Value = new VerifierServerList();

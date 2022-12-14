@@ -186,6 +186,11 @@ public class HostSmartContractBridgeContext : IHostSmartContractBridgeContext, I
             TransactionContext.Transaction.GetHash().ToByteArray());
     }
 
+    public byte[] RecoverPublicKeyWithArgs(byte[] signature, byte[] hash)
+    {
+        return RecoverPublicKey(signature, hash);
+    }
+
     public T Call<T>(Address fromAddress, Address toAddress, string methodName, ByteString args)
         where T : IMessage<T>, new()
     {

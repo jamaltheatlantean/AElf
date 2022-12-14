@@ -116,6 +116,15 @@ public class CSharpSmartContractContext : ISmartContractBridgeContext
     }
 
     /// <summary>
+    ///     Deserialize Json string to Dictionary(string, object)
+    /// </summary>
+    /// <returns>Dictionary(string, object)</returns>
+    public Dictionary<string, object> DeserializeJsonToDictionary(string json)
+    {
+        return SmartContractBridgeContextImplementation.DeserializeJsonToDictionary(json);
+    }
+
+    /// <summary>
     ///     Returns the transaction included in the previous block (previous to the one currently executing).
     /// </summary>
     /// <returns>A list of transaction.</returns>

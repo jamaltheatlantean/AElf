@@ -120,6 +120,8 @@ message Verifier {
   string name = 1;
   // available in 5 minutes
   bytes signature = 2;
+  string data = 3;
+  aelf.Address verifier_address = 4;
 }
 
 message VerifierServer {

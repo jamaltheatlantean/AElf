@@ -31,9 +31,11 @@ public partial class CAContract
         }
 
         //TODO:Check verifier signature.
-        var pubkey = Context.RecoverPublicKeyWithArgs(input.GuardianToAdd?.Verifier.Signature.ToByteArray(),
-            HashHelper.ComputeFrom("aaa").ToByteArray());
+        var verifierInfo = input.GuardianToAdd?.Verifier;
+        var pubkey = Context.RecoverPublicKeyWithArgs(verifierInfo?.Signature.ToByteArray(),
+            HashHelper.ComputeFrom(verifierInfo?.Data).ToByteArray());
         var verifierAddress = Address.FromPublicKey(pubkey);
+        Assert(verifierAddress == verifierInfo?.VerifierAddress,"Verification failed.");
 
         //TODO:Whether the approved guardians count is satisfied.
 

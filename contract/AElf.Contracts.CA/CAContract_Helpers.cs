@@ -7,11 +7,11 @@ public partial class CAContract
 { 
     private void JsonExpressionCalculate(string jsonExpression)
     {
-        Dictionary<string, object> jsonObj = Context.DeserializeJsonToDictionary(jsonExpression);
-        if (jsonObj["opr"] == null) return;
-        Assert(jsonObj["opr"].ToString().Equals("?:"), "out opr fail");
-        Assert(Context.DeserializeJsonToDictionary(jsonObj["left"].ToString())["opr"].ToString().Equals("?:"), "inner opr fail");
-        // switch (jsonObj["opr"])
+        // Dictionary<string, object> jsonObj = Context.DeserializeJsonToDictionary(jsonExpression);
+        // if (jsonObj["opr"] == null) return;
+        // Assert(jsonObj["opr"].ToString().Equals("?:"), "out opr fail");
+        // Assert(Context.DeserializeJsonToDictionary(jsonObj["left"].ToString())["opr"].ToString().Equals("?:"), "inner opr fail");
+        // // switch (jsonObj["opr"])
         // {
         //     case "?:":
         //         Assert(1 == 1, "fail");

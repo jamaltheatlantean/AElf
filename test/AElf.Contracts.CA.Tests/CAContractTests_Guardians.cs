@@ -22,8 +22,7 @@ public partial class CAContractTests
 
     private async Task<ByteString> GenerateSignature(ECKeyPair verifier,string guardianType)
     {
-        var data = HashHelper.ConcatAndCompute(HashHelper.ComputeFrom(guardianType),
-            HashHelper.ComputeFrom(TimestampHelper.GetUtcNow()));
+        var data = HashHelper.ComputeFrom(guardianType);
         var signature = CryptoHelper.SignWithPrivateKey(verifier.PrivateKey, data.ToByteArray());
         return ByteStringHelper.FromHexString(signature.ToHex());
     }
@@ -99,7 +98,9 @@ public partial class CAContractTests
                 Verifier = new Verifier
                 {
                     Name = VerifierName1,
-                    Signature = signature1
+                    Signature = signature1,
+                    Data = GuardianType1,
+                    VerifierAddress = VerifierAddress1
                 }
             },
             GuardiansApproved = {guardianApprove}
@@ -114,6 +115,98 @@ public partial class CAContractTests
             holderInfo.GuardiansInfo.Guardians.Last().GuardianType.GuardianType_.ShouldBe(GuardianType1);
         }
         return caHash;
+    }
+    
+    [Fact]
+    public async Task AddGuardianTest_Failed_IncorrectData()
+    {
+        var caHash = await CreateHolder();
+        var signature = await GenerateSignature(VerifierKeyPair, GuardianType1);
+        var signature1 = await GenerateSignature(VerifierKeyPair1, GuardianType1);
+        var guardianApprove = new List<Guardian>
+        {
+            new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = GuardianType,
+                    Type = 0
+                },
+                Verifier = new Verifier
+                {
+                    Name = VerifierName,
+                    Signature = signature
+                }
+            }
+        };
+        var input = new AddGuardianInput
+        {
+            CaHash = caHash,
+            GuardianToAdd = new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = GuardianType1,
+                    Type = 0
+                },
+                Verifier = new Verifier
+                {
+                    Name = VerifierName1,
+                    Signature = signature1,
+                    Data = GuardianType,
+                    VerifierAddress = VerifierAddress1
+                }
+            },
+            GuardiansApproved = {guardianApprove}
+        };
+        var executionResult = await CaContractStub.AddGuardian.SendWithExceptionAsync(input);
+        executionResult.TransactionResult.Error.ShouldContain("Verification failed.");
+    }
+    
+    [Fact]
+    public async Task AddGuardianTest_Failed_IncorrectAddress()
+    {
+        var caHash = await CreateHolder();
+        var signature = await GenerateSignature(VerifierKeyPair, GuardianType1);
+        var signature1 = await GenerateSignature(VerifierKeyPair1, GuardianType1);
+        var guardianApprove = new List<Guardian>
+        {
+            new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = GuardianType,
+                    Type = 0
+                },
+                Verifier = new Verifier
+                {
+                    Name = VerifierName,
+                    Signature = signature
+                }
+            }
+        };
+        var input = new AddGuardianInput
+        {
+            CaHash = caHash,
+            GuardianToAdd = new Guardian
+            {
+                GuardianType = new GuardianType
+                {
+                    GuardianType_ = GuardianType1,
+                    Type = 0
+                },
+                Verifier = new Verifier
+                {
+                    Name = VerifierName1,
+                    Signature = signature1,
+                    Data = GuardianType1,
+                    VerifierAddress = VerifierAddress
+                }
+            },
+            GuardiansApproved = {guardianApprove}
+        };
+        var executionResult = await CaContractStub.AddGuardian.SendWithExceptionAsync(input);
+        executionResult.TransactionResult.Error.ShouldContain("Verification failed.");
     }
     
      [Fact]

@@ -27,6 +27,8 @@ public interface ISmartContractBridgeContext
     Hash OriginTransactionId { get; }
 
     long CurrentHeight { get; }
+    
+    long TransactionRefBlockNumber { get; }
 
     Timestamp CurrentBlockTime { get; }
     Hash PreviousBlockHash { get; }
@@ -41,7 +43,7 @@ public interface ISmartContractBridgeContext
 
     byte[] RecoverPublicKeyWithArgs(byte[] signature, byte[] hash);
 
-    Dictionary<string, object> DeserializeJsonToDictionary(string json);
+    Dictionary<string, object> ParseJsonToPlainDictionary(string json);
 
     List<Transaction> GetPreviousBlockTransactions();
 

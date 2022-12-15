@@ -4,7 +4,6 @@ using AElf.Kernel.SmartContract;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
-using Org.BouncyCastle.Crypto;
 
 namespace AElf.Sdk.CSharp;
 
@@ -83,6 +82,11 @@ public class CSharpSmartContractContext : ISmartContractBridgeContext
     public long CurrentHeight => SmartContractBridgeContextImplementation.CurrentHeight;
 
     /// <summary>
+    ///     The height of the block that contains the transaction before charging.
+    /// </summary>
+    public long TransactionRefBlockNumber => SmartContractBridgeContextImplementation.TransactionRefBlockNumber;
+    
+    /// <summary>
     ///     The time included in the current blocks header.
     /// </summary>
     public Timestamp CurrentBlockTime => SmartContractBridgeContextImplementation.CurrentBlockTime;
@@ -116,12 +120,12 @@ public class CSharpSmartContractContext : ISmartContractBridgeContext
     }
 
     /// <summary>
-    ///     Deserialize Json string to Dictionary(string, object)
+    ///     Deserialize Json string to Dictionary(string, string)
     /// </summary>
-    /// <returns>Dictionary(string, object)</returns>
-    public Dictionary<string, object> DeserializeJsonToDictionary(string json)
+    /// <returns>Dictionary(string, string)</returns>
+    public Dictionary<string, object> ParseJsonToPlainDictionary(string json)
     {
-        return SmartContractBridgeContextImplementation.DeserializeJsonToDictionary(json);
+        return SmartContractBridgeContextImplementation.ParseJsonToPlainDictionary(json);
     }
 
     /// <summary>

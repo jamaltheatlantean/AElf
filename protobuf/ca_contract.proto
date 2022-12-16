@@ -77,6 +77,7 @@ message InitializeInput{
 message CreateCAHolderInput {
   Guardian guardian_approved = 1;
   Manager manager = 2;
+  string json_guardian_rules = 3;
 }
 
 message HolderInfo {

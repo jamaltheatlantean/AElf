@@ -8,7 +8,7 @@ public static class CAContractConstants
     // >1 fine, == 0 , conflict.
     public const int LoginGuardianTypeIsNotOccupied = 1;
     public const int LoginGuardianTypeIsYours = 2;
-
+    public const int SecondsForOneDay = 86400; // 24*60*60
     public const string GeneralJsonGuardianRules = @"
     {
         ""||"": [{

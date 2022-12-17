@@ -26,11 +26,17 @@ public class CAContractTestBase : ContractTestBase<CAContractTestAElfModule>
     protected ECKeyPair User3KeyPair => Accounts[3].KeyPair;
     protected ECKeyPair VerifierKeyPair => Accounts[4].KeyPair;
     protected ECKeyPair VerifierKeyPair1 => Accounts[5].KeyPair;
+    protected ECKeyPair VerifierKeyPair2 => Accounts[6].KeyPair;
+    protected ECKeyPair VerifierKeyPair3 => Accounts[7].KeyPair;
+    protected ECKeyPair VerifierKeyPair4 => Accounts[8].KeyPair;
     protected Address User1Address => Accounts[1].Address;
     protected Address User2Address => Accounts[2].Address;
     protected Address User3Address => Accounts[3].Address;
     protected Address VerifierAddress => Accounts[4].Address;
     protected Address VerifierAddress1  => Accounts[5].Address;
+    protected Address VerifierAddress2 => Accounts[6].Address;
+    protected Address VerifierAddress3 => Accounts[7].Address;
+    protected Address VerifierAddress4 => Accounts[8].Address;
 
     
     protected Hash CaContractName => HashHelper.ComputeFrom("AElf.ContractNames.CA");

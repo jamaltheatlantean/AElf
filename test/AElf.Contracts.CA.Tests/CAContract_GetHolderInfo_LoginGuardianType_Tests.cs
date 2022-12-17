@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AElf.CSharp.Core;
+using AElf.Kernel;
 using AElf.Types;
 using Google.Protobuf.Collections;
 using Shouldly;
@@ -384,8 +385,9 @@ public partial class CAContractTests : CAContractTestBase
 
     private async Task AddAGuardian_Helper(Hash caHash)
     {
-        var signature = await GenerateSignature(VerifierKeyPair, GuardianType1);
-        var signature1 = await GenerateSignature(VerifierKeyPair1, GuardianType1);
+        var verificationTime = TimestampHelper.GetUtcNow();
+        var signature = await GenerateSignature(VerifierKeyPair,VerifierAddress,verificationTime, GuardianType,0);
+        var signature1 = await GenerateSignature(VerifierKeyPair1,VerifierAddress1,verificationTime, GuardianType1,0);
         var guardianApprove = new List<Guardian>
         {
             new Guardian
@@ -398,7 +400,9 @@ public partial class CAContractTests : CAContractTestBase
                 Verifier = new Verifier
                 {
                     Name = VerifierName,
-                    Signature = signature
+                    Signature = signature,
+                    VerifierAddress = VerifierAddress,
+                    VerificationTime = verificationTime
                 }
             }
         };
@@ -415,7 +419,9 @@ public partial class CAContractTests : CAContractTestBase
                 Verifier = new Verifier
                 {
                     Name = VerifierName1,
-                    Signature = signature1
+                    Signature = signature1,
+                    VerifierAddress = VerifierAddress1,
+                    VerificationTime = verificationTime
                 }
             },
             GuardiansApproved = {guardianApprove}

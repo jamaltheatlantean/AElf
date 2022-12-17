@@ -95,7 +95,7 @@ public partial class CAContractTests : CAContractTestBase
                 DeviceString = "iphone14-2022"
             }
         });
-        txExecutionResult.TransactionResult.Error.ShouldContain("Invalid CA hash.");
+        txExecutionResult.TransactionResult.Error.ShouldContain("CA holder is null");
         
         //input caHash is null
         txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
@@ -135,7 +135,7 @@ public partial class CAContractTests : CAContractTestBase
                 DeviceString = "iphone14-2022"
             }
         });
-        txExecutionResult.TransactionResult.Error.ShouldContain("Invalid CA hash.");
+        txExecutionResult.TransactionResult.Error.ShouldContain("CA holder is null.");
         
         //input caHash is null
         txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()

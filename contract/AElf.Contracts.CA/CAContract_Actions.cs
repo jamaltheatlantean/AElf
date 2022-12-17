@@ -8,7 +8,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
 {
     public override Empty Initialize(InitializeInput input)
     {
-        Assert(!State.Initialized.Value,"Already initialized.");
+        Assert(!State.Initialized.Value, "Already initialized.");
         State.Admin.Value = input.ContractAdmin ?? Context.Sender;
         State.TokenContract.Value =
             Context.GetContractAddressByName(SmartContractConstants.TokenContractSystemName);
@@ -25,18 +25,19 @@ public partial class CAContract : CAContractContainer.CAContractBase
     {
         Assert(Context.ChainId == ChainHelper.ConvertBase58ToChainId("AELF"),
             "CA Holder can only be created at aelf mainchain.");
-        Assert(input != null, "invalid input");
-        Assert(input.GuardianApproved  != null && input.GuardianApproved.GuardianType != null 
-               && !String.IsNullOrEmpty(input.GuardianApproved.GuardianType.GuardianType_), 
+        if (input == null)
+        {
+            throw new AssertionException("Invalid input.");
+        }
+        Assert(input.GuardianApproved != null 
+               && input.GuardianApproved.GuardianType != null
+               && !string.IsNullOrEmpty(input.GuardianApproved.GuardianType.GuardianType_),
             "invalid input guardian type");
         Assert(input.Manager != null, "invalid input manager");
-        var guardianType = input.GuardianApproved.GuardianType;
-        var holderId = State.LoginGuardianTypeMap[guardianType.GuardianType_];
+        var guardianType = input.GuardianApproved?.GuardianType;
+        var holderId = State.LoginGuardianTypeMap[guardianType?.GuardianType_];
         var holderInfo = holderId != null ? State.HolderInfoMap[holderId] : new HolderInfo();
-        
-        string json = "{\"opr\":\"?:\", \"left\":{\"opr\":\"?:\"}}";
-        JsonExpressionCalculate(json);
-        
+
         // if CAHolder does not exist
         if (holderId == null)
         {
@@ -47,20 +48,24 @@ public partial class CAContract : CAContractContainer.CAContractBase
             holderInfo.Managers.Add(input.Manager);
             holderInfo.GuardiansInfo = new GuardiansInfo
             {
-                Guardians = { input.GuardianApproved },
-                LoginGuardianTypeIndexes = { 0 }
+                Guardians = {input.GuardianApproved},
+                LoginGuardianTypeIndexes = {0}
             };
-            
+            holderInfo.JsonExpression = string.IsNullOrEmpty(input.JsonGuardianRules)
+                ? CAContractConstants.GeneralJsonGuardianRules
+                : input.JsonGuardianRules;
+
             State.HolderInfoMap[holderId] = holderInfo;
-            State.LoginGuardianTypeMap[guardianType.GuardianType_] = holderId;
+            State.LoginGuardianTypeMap[guardianType?.GuardianType_] = holderId;
         }
+
         // Log Event
         Context.Fire(new CAHolderCreated
         {
             Creator = Context.Sender,
             CaHash = holderId,
-            Manager = input.Manager.ManagerAddresses,
-            DeviceString = input.Manager.DeviceString
+            Manager = input.Manager?.ManagerAddresses,
+            DeviceString = input.Manager?.DeviceString
         });
 
         return new Empty();

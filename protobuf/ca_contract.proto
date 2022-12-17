@@ -8,6 +8,7 @@ package ca;
 import "aelf/core.proto";
 import "aelf/options.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "AElf.Contracts.CA";
 
@@ -24,6 +25,8 @@ service CAContract {
   
   // If Guardian is already removed, return ture
   rpc RemoveGuardian (RemoveGuardianInput) returns (google.protobuf.Empty) {}
+  
+  rpc UpdateGuardian (UpdateGuardianInput) returns (google.protobuf.Empty) {}
   
   // If GuardianType is already setted, return true
   rpc SetGuardianTypeForLogin (SetGuardianTypeForLoginInput) returns (google.protobuf.Empty) {}
@@ -134,8 +137,8 @@ message Verifier {
   string name = 1;
   // available in 5 minutes
   bytes signature = 2;
-  string data = 3;
-  aelf.Address verifier_address = 4;
+  aelf.Address verifier_address = 3;
+  google.protobuf.Timestamp verification_time = 4;
 }
 
 message VerifierServer {
@@ -166,6 +169,13 @@ message RemoveGuardianInput {
   aelf.Hash ca_hash = 1;
   Guardian guardian_to_remove = 2;
   repeated Guardian guardians_approved = 3;
+}
+
+message UpdateGuardianInput{
+  aelf.Hash ca_hash = 1;
+  Guardian guardian_to_update_pre = 2;
+  Guardian guardian_to_update_new = 3;
+  repeated Guardian guardians_approved = 4;
 }
 
 message SetGuardianTypeForLoginInput {
@@ -326,7 +336,7 @@ message GuardianAdded{
   option (aelf.is_event) = true;
   aelf.Hash ca_hash = 1[(aelf.is_indexed) = true];
   aelf.Address ca_address = 2;
-  GuardianType guardian_added = 3;
+  Guardian guardian_added = 3;
 }
 
 //Guardian removed
@@ -334,7 +344,16 @@ message GuardianRemoved{
   option (aelf.is_event) = true;
   aelf.Hash ca_hash = 1[(aelf.is_indexed) = true];
   aelf.Address ca_address = 2;
-  GuardianType guardian_removed = 3;
+  Guardian guardian_removed = 3;
+}
+
+//Guardian updated
+message GuardianUpdated{
+  option (aelf.is_event) = true;
+  aelf.Hash ca_hash = 1[(aelf.is_indexed) = true];
+  aelf.Address ca_address = 2;
+  Guardian guardian_updated_pre = 3;
+  Guardian guardian_updated_new = 4;
 }
 
 // LoginGuardianType added

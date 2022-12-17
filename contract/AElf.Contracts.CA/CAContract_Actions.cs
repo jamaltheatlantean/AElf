@@ -40,6 +40,7 @@ public partial class CAContract : CAContractContainer.CAContractBase
         // if CAHolder does not exist
         if (holderId == null)
         {
+            Assert(State.LoginGuardianTypeLockMap[guardianType.GuardianType_] == 0,"guardianType is Locked");
             holderId = HashHelper.ConcatAndCompute(Context.TransactionId, Context.PreviousBlockHash);
 
             holderInfo.CreatorAddress = Context.Sender;

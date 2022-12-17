@@ -14,6 +14,12 @@ public partial class CAContractState : ContractState
     public MappedState<string, Hash> LoginGuardianTypeMap { get; set; }
     
     /// <summary>
+    /// lock for LoginGuardianType
+    /// </summary>
+    public MappedState<string, long> LoginGuardianTypeLockMap { get; set; }
+    
+    public MappedState<Hash, int> HolderChainIdInfoMap { get; set; }
+    /// <summary>
     /// HolderInfo Hash -> HolderInfo
     /// All CA contracts
     /// </summary>

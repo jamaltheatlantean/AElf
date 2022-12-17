@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using AElf.CSharp.Core;
 using AElf.Types;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -66,6 +67,47 @@ public partial class CAContract
         holderInfo.GuardiansInfo.LoginGuardianTypeIndexes.Remove(index);
 
         return new Empty();
+    }
+
+    public override Empty LockLoginGuardianType(LockLoginGuardianTypeInput input)
+    {
+        Assert(!String.IsNullOrEmpty(input.LoginGuardianType));
+        var caHash = State.LoginGuardianTypeMap[input.LoginGuardianType];
+        Assert(caHash == null,"lockLoginGuardianType is already existed");
+        var lockTime = State.LoginGuardianTypeLockMap[input.LoginGuardianType];
+        Assert(lockTime.Add(CAContractConstants.SecondsForOneDay) < Context.CurrentBlockTime.Seconds, "already Locked");
+        State.LoginGuardianTypeLockMap[input.LoginGuardianType] = Context.CurrentBlockTime.Seconds;
+        return new Empty();
+    }
+
+    public override Empty UnlockLoginGuardianType(UnlockLoginGuardianTypeInput input)
+    {
+        Assert(!String.IsNullOrEmpty(input.LoginGuardianType));
+        var lockTime = State.LoginGuardianTypeLockMap[input.LoginGuardianType];
+        Assert(lockTime.Add(CAContractConstants.SecondsForOneDay) >= Context.CurrentBlockTime.Seconds, "not Locked");
+        State.LoginGuardianTypeLockMap[input.LoginGuardianType] = 0;
+        return new Empty();
+    }
+
+    public override Empty UpdateHolderChainId(UpdateHolderChainIdInput input)
+    {
+        Assert(input.CaHash != null);
+        Assert(!String.IsNullOrEmpty(input.LoginGuardianType));
+        var caHash = State.LoginGuardianTypeMap[input.LoginGuardianType];
+        Assert(caHash == input.CaHash);
+        State.HolderChainIdInfoMap[input.CaHash] = input.ChainId;
+        return new Empty();
+    }
+
+    public override GetChainIdAndCaHashOutput GetChainIdAndCaHash(GetChainIdAndCaHashInput input)
+    {
+        var caHash = State.LoginGuardianTypeMap[input.LoginGuardianType];
+        Assert(caHash != null,"caHash not exist");
+        return new GetChainIdAndCaHashOutput()
+        {
+            CaHash = caHash,
+            ChainId = State.HolderChainIdInfoMap[caHash]
+        };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

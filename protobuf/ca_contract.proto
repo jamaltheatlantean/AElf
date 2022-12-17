@@ -62,7 +62,15 @@ service CAContract {
 
   rpc RemoveCAServer (RemoveCAServerInput) returns (google.protobuf.Empty){}
 
+  rpc LockLoginGuardianType (LockLoginGuardianTypeInput) returns (google.protobuf.Empty){}
+  
+  rpc UnlockLoginGuardianType (UnlockLoginGuardianTypeInput) returns (google.protobuf.Empty){}
+  
+  rpc UpdateHolderChainId (UpdateHolderChainIdInput) returns (google.protobuf.Empty){}
+ 
   // as named.
+  rpc GetChainIdAndCaHash (GetChainIdAndCaHashInput) returns (GetChainIdAndCaHashOutput) {option (aelf.is_view) = true;}
+  
   rpc GetHolderInfo(GetHolderInfoInput) returns (GetHolderInfoOutput) {option (aelf.is_view) = true;}
   
   rpc GetVerifierServers (GetVerifierServersInput) returns (GetVerifierServersOutput) {option (aelf.is_view) = true;}
@@ -260,6 +268,25 @@ message RemoveCAServerInput {
   string name = 1;
 }
 
+message LockLoginGuardianTypeInput {
+  string login_guardian_type = 1;
+}
+message UnlockLoginGuardianTypeInput {
+  string login_guardian_type = 1;
+}
+
+message UpdateHolderChainIdInput {
+  string login_guardian_type = 1;
+  int32 chain_id = 2;
+  aelf.Hash ca_hash = 3;
+}
+message GetChainIdAndCaHashInput {
+  string login_guardian_type = 1;
+}
+message GetChainIdAndCaHashOutput {
+  int32 chain_id = 1;
+  aelf.Hash ca_hash = 2;
+}
 message GetVerifierServersInput {
 }
 

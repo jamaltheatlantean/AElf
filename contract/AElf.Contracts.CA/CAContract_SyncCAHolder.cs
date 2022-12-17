@@ -33,11 +33,11 @@ public partial class CAContract
 
     public override Empty SyncHolderInfo(SyncHolderInfoInput input)
     {
-        var originalTransaction = Transaction.Parser.ParseFrom(input.TransactionBytes);
-        Assert(originalTransaction.MethodName == nameof(ValidateCAHolderInfoWithManagersExists), $"Invalid transaction method.");
-        
+
+        var originalTransaction = MethodNameVerify(input.VerificationTransactionInfo, nameof(ValidateCAHolderInfoWithManagersExists));
         var originalTransactionId = originalTransaction.GetHash();
-        HolderInfoTransactionVerify(originalTransactionId, input.ParentChainHeight, input.FromChainId, input.MerklePath, input.CaContractAddress);
+        
+        TransactionVerify(originalTransactionId, input.VerificationTransactionInfo.ParentChainHeight, input.VerificationTransactionInfo.FromChainId, input.VerificationTransactionInfo.MerklePath, input.VerificationTransactionInfo.CaContractAddress);
         var transactionInput =
             ValidateCAHolderInfoWithManagersExistsInput.Parser.ParseFrom(originalTransaction.Params);
         
@@ -52,7 +52,15 @@ public partial class CAContract
         return new Empty();
     }
     
-    private void HolderInfoTransactionVerify(Hash transactionId, long parentChainHeight, int chainId, MerklePath merklePath, Address address)
+    private Transaction MethodNameVerify(VerificationTransactionInfo info, string methodNameExpected)
+    {
+        var originalTransaction = Transaction.Parser.ParseFrom(info.TransactionBytes);
+        Assert(originalTransaction.MethodName == methodNameExpected, $"Invalid transaction method.");
+
+        return originalTransaction;
+    }
+    
+    private void TransactionVerify(Hash transactionId, long parentChainHeight, int chainId, MerklePath merklePath, Address address)
     {
         var verificationInput = new VerifyTransactionInput
         {
@@ -64,7 +72,7 @@ public partial class CAContract
 
         var verificationResult = Context.Call<BoolValue>(address,
             nameof(ACS7Container.ACS7ReferenceState.VerifyTransaction), verificationInput);
-        Assert(verificationResult.Value, "CAHolder validatation transaction verification failed.");
+        Assert(verificationResult.Value, "transaction verification failed.");
     }
 
 

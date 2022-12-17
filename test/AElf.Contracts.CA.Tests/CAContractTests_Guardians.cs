@@ -18,6 +18,7 @@ public partial class CAContractTests
     private const string GuardianType = "test@google.com";
     private const string GuardianType1 = "test1@google.com";
     private const string GuardianType2 = "test2@google.com";
+    private const string GuardianTypeNotExist = "NotExists@google.com";
     private const string VerifierName = "HuoBi";
     private const string VerifierName1 = "PortKey";
     private const string VerifierName2 = "Binance";

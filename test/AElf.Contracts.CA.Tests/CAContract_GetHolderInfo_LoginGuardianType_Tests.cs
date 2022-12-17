@@ -221,6 +221,46 @@ public partial class CAContractTests : CAContractTestBase
     }
     
     [Fact]
+    public async Task SetLoginGuardianType_GuardianTypeNotExists_Test()
+    {
+        var caHash = await CreateAHolder_AndGetCash_Helper();
+
+        var guardianType = new GuardianType
+        {
+            Type = GuardianTypeType.GuardianTypeOfEmail,
+            GuardianType_ = GuardianTypeNotExist
+        };
+
+        var getHolderInfoOutput = await SetGuardianTypeForLogin_AndGetHolderInfo_Helper(caHash, guardianType);
+
+        var guardiansInfo = getHolderInfoOutput.Output.GuardiansInfo;
+        
+        guardiansInfo.LoginGuardianTypeIndexes.Count.ShouldBe(1);
+        guardiansInfo.LoginGuardianTypeIndexes.ShouldContain(0);
+
+    }
+    
+    [Fact]
+    public async Task SetLoginGuardianType_DuplicatedGuardianType_Test()
+    {
+        var caHash = await CreateAHolder_AndGetCash_Helper();
+
+        var guardianType = new GuardianType
+        {
+            Type = GuardianTypeType.GuardianTypeOfEmail,
+            GuardianType_ = GuardianTypeNotExist
+        };
+
+        var getHolderInfoOutput = await SetGuardianTypeForLogin_AndGetHolderInfo_Helper(caHash, guardianType);
+
+        var guardiansInfo = getHolderInfoOutput.Output.GuardiansInfo;
+        
+        guardiansInfo.LoginGuardianTypeIndexes.Count.ShouldBe(1);
+        guardiansInfo.LoginGuardianTypeIndexes.ShouldContain(0);
+
+    }
+    
+    [Fact]
     public async Task UnsetLoginGuardianType_Succeed_Test()
     {
         var caHash = await CreateAHolder_AndGetCash_Helper();

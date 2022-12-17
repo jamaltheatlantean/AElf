@@ -1,3 +1,4 @@
+using System.Linq;
 using AElf.Sdk.CSharp;
 using AElf.Standards.ACS7;
 using AElf.Types;
@@ -24,7 +25,7 @@ public partial class CAContract
             if (!CAHolderContainsManager(holderInfo.Managers, manager))
             {
                 Assert(false, 
-                    $"Manager(address:{manager.ManagerAddresses},device_string{manager.DeviceString}) is not in this CAHolder.");
+                    $"Manager(address:{manager.ManagerAddress},device_string{manager.DeviceString}) is not in this CAHolder.");
             }
         }
         
@@ -45,13 +46,48 @@ public partial class CAContract
         var holderInfo = State.HolderInfoMap[holderId] ?? new HolderInfo();
 
         holderInfo.CreatorAddress = Context.Sender;
-        holderInfo.Managers.AddRange(transactionInput.Managers);
+        var managersToAdd = ManagersExcept(transactionInput.Managers, holderInfo.Managers);
+        var managersToRemove = ManagersExcept(holderInfo.Managers, transactionInput.Managers);
+        
+        holderInfo.Managers.AddRange(managersToAdd);
+        SetDelegators(holderId, managersToAdd);
+        foreach (var manager in managersToRemove)
+        {
+            holderInfo.Managers.Remove(manager);
+        }
+        
+        RemoveDelegators(holderId, managersToRemove);
         
         State.HolderInfoMap[holderId] = holderInfo;
 
         return new Empty();
     }
-    
+
+    private RepeatedField<Manager> ManagersExcept(RepeatedField<Manager> set1, RepeatedField<Manager> set2)
+    {
+        RepeatedField<Manager> resultSet = new RepeatedField<Manager>();
+        
+        foreach (var manager1 in set1)
+        {
+            bool theSame = false;
+            foreach (var manager2 in set2)
+            {
+                if (manager1.ManagerAddress == manager2.ManagerAddress)
+                {
+                    theSame = true;
+                    break;
+                }
+            }
+
+            if (!theSame)
+            {
+                resultSet.Add(manager1);
+            }
+        }
+
+        return resultSet;
+    }
+
     private Transaction MethodNameVerify(VerificationTransactionInfo info, string methodNameExpected)
     {
         var originalTransaction = Transaction.Parser.ParseFrom(info.TransactionBytes);
@@ -80,7 +116,7 @@ public partial class CAContract
     {
         foreach (var manager in managers)
         {
-            if (manager.ManagerAddresses == targetManager.ManagerAddresses
+            if (manager.ManagerAddress == targetManager.ManagerAddress
                 && manager.DeviceString == targetManager.DeviceString)
             {
                 return true;

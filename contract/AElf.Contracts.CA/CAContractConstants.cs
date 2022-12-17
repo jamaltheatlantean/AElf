@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace AElf.Contracts.CA;
 
 public static class CAContractConstants
@@ -48,4 +50,7 @@ public static class CAContractConstants
     public const string GuardianCount = "guardianCount";
 
     public const int TenThousand = 10000;
+
+    public const string ELFTokenSymbol = "ELF";
+    public const int CADelegationAmount = 100000000;
 }

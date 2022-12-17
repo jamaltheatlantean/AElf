@@ -22,7 +22,7 @@ public partial class CAContractTests : CAContractTestBase
             },
             Manager = new Manager
             {
-                ManagerAddresses = User1Address,
+                ManagerAddress = User1Address,
                 DeviceString = "123"
             }
         });
@@ -36,7 +36,7 @@ public partial class CAContractTests : CAContractTestBase
         {
             Manager = new Manager
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "567"
             },
             LoginGuardianType = new GuardianType
@@ -59,7 +59,7 @@ public partial class CAContractTests : CAContractTestBase
         //success
         var manager = new Manager()
         {
-            ManagerAddresses = User2Address,
+            ManagerAddress = User2Address,
             DeviceString = "iphone14-2022"
         };
         await CaContractUser1Stub.AddManager.SendAsync(new AddManagerInput()
@@ -78,7 +78,7 @@ public partial class CAContractTests : CAContractTestBase
             CaHash = caInfo.CaHash,
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -91,7 +91,7 @@ public partial class CAContractTests : CAContractTestBase
             CaHash = notExistedCash,
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -102,7 +102,7 @@ public partial class CAContractTests : CAContractTestBase
         {
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -131,7 +131,7 @@ public partial class CAContractTests : CAContractTestBase
             CaHash = notExistedCash,
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -142,7 +142,7 @@ public partial class CAContractTests : CAContractTestBase
         {
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -161,7 +161,7 @@ public partial class CAContractTests : CAContractTestBase
             CaHash = caInfo.CaHash,
             Manager = new Manager()
             {
-                ManagerAddresses = User2Address,
+                ManagerAddress = User2Address,
                 DeviceString = "iphone14-2022"
             }
         });
@@ -170,7 +170,7 @@ public partial class CAContractTests : CAContractTestBase
         //success
         var manager = new Manager
         {
-            ManagerAddresses = User1Address,
+            ManagerAddress = User1Address,
             DeviceString = "123"
         };
         await CaContractUser1Stub.RemoveManager.SendAsync(new RemoveManagerInput()

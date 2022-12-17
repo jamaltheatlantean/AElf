@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using AElf.Contracts.MultiToken;
 using AElf.Sdk.CSharp;
+using AElf.Types;
+using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CA;
@@ -44,6 +48,8 @@ public partial class CAContract : CAContractContainer.CAContractBase
 
             holderInfo.CreatorAddress = Context.Sender;
             holderInfo.Managers.Add(input.Manager);
+            SetDelegator(holderId, input.Manager);
+            
             holderInfo.GuardiansInfo = new GuardiansInfo
             {
                 Guardians = { input.GuardianApproved },
@@ -58,10 +64,51 @@ public partial class CAContract : CAContractContainer.CAContractBase
         {
             Creator = Context.Sender,
             CaHash = holderId,
-            Manager = input.Manager.ManagerAddresses,
+            Manager = input.Manager.ManagerAddress,
             DeviceString = input.Manager.DeviceString
         });
 
         return new Empty();
+    }
+
+    private void SetDelegator(Hash holderId, Manager manager)
+    {
+        var delegations = new Dictionary<string, long>
+        {
+            [CAContractConstants.ELFTokenSymbol] = CAContractConstants.CADelegationAmount
+        };
+        
+        Context.SendVirtualInline(holderId, State.TokenContract.Value, "SetTransactionFeeDelegations", new SetTransactionFeeDelegationsInput
+        {
+            DelegatorAddress = manager.ManagerAddress,
+            Delegations =
+            {
+                delegations
+            }
+        });
+    }
+
+    private void SetDelegators(Hash holderId, RepeatedField<Manager> managers)
+    {
+        foreach (var manager in managers)
+        {
+            SetDelegator(holderId, manager);
+        }
+    }
+    
+    private void RemoveDelegator(Hash holderId, Manager manager)
+    {
+        Context.SendVirtualInline(holderId, State.TokenContract.Value, "RemoveTransactionFeeDelegator", new RemoveTransactionFeeDelegatorInput
+        {
+            DelegatorAddress = manager.ManagerAddress
+        });
+    }
+
+    private void RemoveDelegators(Hash holderId, RepeatedField<Manager> managers)
+    {
+        foreach (var manager in managers)
+        {
+            RemoveDelegator(holderId, manager);
+        }
     }
 }

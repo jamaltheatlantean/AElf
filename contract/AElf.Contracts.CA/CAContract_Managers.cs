@@ -39,12 +39,13 @@ public partial class CAContract
         if (!holder.Managers.Contains(input.Manager))
         {
             State.HolderInfoMap[caHash].Managers.Add(input.Manager);
+            SetDelegator(caHash, input.Manager);
         }
         
         Context.Fire(new ManagerSocialRecovered()
         {
             CaHash = caHash,
-            Manager = input.Manager.ManagerAddresses,
+            Manager = input.Manager.ManagerAddress,
             DeviceString = input.Manager.DeviceString
         });
         
@@ -62,12 +63,13 @@ public partial class CAContract
         if (!State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
             State.HolderInfoMap[input.CaHash].Managers.Add(input.Manager);
+            SetDelegator(input.CaHash, input.Manager);
         }
         
         Context.Fire(new ManagerAdded
         {
             CaHash = input.CaHash,
-            Manager = input.Manager.ManagerAddresses,
+            Manager = input.Manager.ManagerAddress,
             DeviceString = input.Manager.DeviceString
         });
         
@@ -84,14 +86,15 @@ public partial class CAContract
         // Manager exists
         if (State.HolderInfoMap[input.CaHash].Managers.Contains(input.Manager))
         {
-            Assert(Context.Sender.Equals(input.Manager.ManagerAddresses), "No permission to remove");
+            Assert(Context.Sender.Equals(input.Manager.ManagerAddress), "No permission to remove");
             State.HolderInfoMap[input.CaHash].Managers.Remove(input.Manager);
+            RemoveDelegator(input.CaHash, input.Manager);
         }
         
         Context.Fire(new ManagerRemoved
         {
             CaHash = input.CaHash,
-            Manager = input.Manager.ManagerAddresses,
+            Manager = input.Manager.ManagerAddress,
             DeviceString = input.Manager.DeviceString
         });
 
@@ -103,7 +106,7 @@ public partial class CAContract
         Assert(hash != null, "invalid input CaHash");
         CheckManagerPermission(hash, Context.Sender);
         Assert(manager != null, "invalid input manager");
-        Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddresses != null, "invalid input manager");
+        Assert(!String.IsNullOrEmpty(manager.DeviceString) && manager.ManagerAddress != null, "invalid input manager");
     }
     
     public override Empty ManagerForwardCall(ManagerForwardCallInput input)
@@ -155,7 +158,7 @@ public partial class CAContract
     private void CheckManagerPermission(Hash caHash, Address managerAddress)
     {
         Assert(State.HolderInfoMap[caHash] != null, $"CA holder is null.CA hash:{caHash}");
-        var managerList = State.HolderInfoMap[caHash].Managers.Select(manager => manager.ManagerAddresses).ToList();
+        var managerList = State.HolderInfoMap[caHash].Managers.Select(manager => manager.ManagerAddress).ToList();
         Assert(managerList.Contains(managerAddress), "No permission.");
     }
 }

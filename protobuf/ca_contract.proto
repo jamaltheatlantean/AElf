@@ -99,7 +99,7 @@ message GuardiansInfo {
 }
 
 message Manager {
-  aelf.Address manager_addresses = 1;
+  aelf.Address manager_address = 1;
   string device_string = 2;
 }
 

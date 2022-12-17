@@ -51,7 +51,7 @@ public partial class CAContractTests
             },
             Manager = new Manager
             {
-                ManagerAddresses = User1Address,
+                ManagerAddress = User1Address,
                 DeviceString = "123"
             }
         });

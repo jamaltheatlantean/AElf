@@ -21,7 +21,7 @@ public partial class CAContractTests : CAContractTestBase
             },
             Manager = new Manager
             {
-                ManagerAddresses = User1Address,
+                ManagerAddress = User1Address,
                 DeviceString = "123"
             }
         });
@@ -35,7 +35,7 @@ public partial class CAContractTests : CAContractTestBase
             GuardianApproved = null,
             Manager = new Manager
             {
-                ManagerAddresses = User1Address,
+                ManagerAddress = User1Address,
                 DeviceString = "123"
             }
         });
@@ -57,7 +57,7 @@ public partial class CAContractTests : CAContractTestBase
             },
             Manager = new Manager
             {
-                ManagerAddresses = User1Address,
+                ManagerAddress = User1Address,
                 DeviceString = "123"
             }
         });

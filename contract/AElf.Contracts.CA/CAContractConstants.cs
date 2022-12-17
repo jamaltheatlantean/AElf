@@ -12,7 +12,7 @@ public static class CAContractConstants
         ""||"": [{
             ""rule"": {
                 ""minGuardianCount"": ""1"",
-                ""maxGuardianCount"": ""3"",
+                ""maxGuardianCount"": ""4"",
                 ""parameters"": [
                     ""largerThan"",
                     ""guardianApprovedCount"",

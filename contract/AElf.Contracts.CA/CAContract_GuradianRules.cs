@@ -70,7 +70,7 @@ public partial class CAContract
         var minGuardianCount = ParseInt((string)dict[CAContractConstants.MinGuardianCount]);
         var maxGuardianCount = ParseInt((string)dict[CAContractConstants.MaxGuardianCount]);
         // out of scope.
-        if (guardianCount <= minGuardianCount || guardianCount > maxGuardianCount)
+        if (guardianCount < minGuardianCount || guardianCount >= maxGuardianCount)
         {
             return false;
         }

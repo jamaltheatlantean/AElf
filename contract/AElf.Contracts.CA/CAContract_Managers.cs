@@ -28,13 +28,20 @@ public partial class CAContract
         } 
         var holder = State.HolderInfoMap[caHash];
         var guardians = holder.GuardiansInfo.Guardians;
-
-        // TODO Verify guardians with input.GuardiansApproved.
-        if (!true)
+        
+        Assert(input.GuardiansApproved != null, "invalid input Guardians Approved");
+        var count = 0;
+        foreach (var guardian in input.GuardiansApproved)
         {
-            throw new AssertionException("Verification error");
+            if (guardians.Contains(guardian))
+            {
+                count++;
+            }
         }
-            
+        
+        Assert(IsRuleSatisfied(guardians.Count, count, holder.JsonExpression), 
+            "invalid input Guardians Approved");
+
         // Manager does not exists
         if (!holder.Managers.Contains(input.Manager))
         {

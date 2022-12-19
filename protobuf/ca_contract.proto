@@ -231,7 +231,6 @@ message GetHolderInfoOutput{
   aelf.Address ca_address = 2;
   GuardiansInfo guardians_info = 3;
   repeated Manager managers = 4;
-  // TODO repeated RecoveryCondition conditions = 5;
 }
 
 message SocialRecoveryInput {

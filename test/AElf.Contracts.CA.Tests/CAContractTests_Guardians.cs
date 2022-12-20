@@ -570,6 +570,7 @@ public partial class CAContractTests
         var signature = await GenerateSignature(VerifierKeyPair, VerifierAddress, verificationTime, GuardianType1, 0);
         var signature1 =
             await GenerateSignature(VerifierKeyPair1, VerifierAddress1, verificationTime, GuardianType1, 0);
+        
         {
             var holderInfo = await CaContractStub.GetHolderInfo.CallAsync(new GetHolderInfoInput
             {

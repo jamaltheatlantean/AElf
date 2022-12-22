@@ -255,6 +255,15 @@ public partial class CAContractTests
             var executionResult = await CaContractStubManager1.ManagerTransfer.SendWithExceptionAsync(new ManagerTransferInput
             {
                 CaHash = caHash,
+                Amount = 1_00000000,
+                Memo = "ca transfer."
+            });
+            executionResult.TransactionResult.Error.ShouldContain("Invalid input.");
+        }
+        {
+            var executionResult = await CaContractStubManager1.ManagerTransfer.SendWithExceptionAsync(new ManagerTransferInput
+            {
+                CaHash = caHash,
                 Symbol = "ELF",
                 Amount = 1_00000000,
                 Memo = "ca transfer."
@@ -396,6 +405,8 @@ public partial class CAContractTests
             });
             executionResult.TransactionResult.Error.ShouldContain("Invalid input.");
         }
+        
+
         {
             var executionResult = await CaContractStubManager1.ManagerTransferFrom.SendWithExceptionAsync(new ManagerTransferFromInput
             {

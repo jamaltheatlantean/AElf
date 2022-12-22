@@ -51,13 +51,44 @@ public partial class CAContractTests : CAContractTestBase
         });
         
     }
+    
+    [Fact]
+    //SocialRecoveryInput is null;
+    public async Task SocialRecoveryTest_inputNull()
+    {
+        await CreateHolderDefault();
+        var socialRecoverySendAsync = await CaContractStub.SocialRecovery.SendWithExceptionAsync(new SocialRecoveryInput()
+        {
+        });
+        socialRecoverySendAsync.TransactionResult.Error.ShouldContain("invalid input");
+    }
+
+    [Fact]
+    public async Task SocialRecoveryTest_GuardianTypeIsNull()
+    {
+        await CreateHolderDefault();
+        var result = await CaContractStub.SocialRecovery.SendWithExceptionAsync(new SocialRecoveryInput()
+        {
+            Manager = new Manager
+            {
+                ManagerAddress = User2Address,
+                DeviceString = "567"
+            },
+            LoginGuardianType = new GuardianType
+            {
+                Type = 0
+            }
+        });
+        result.TransactionResult.Error.ShouldContain("invalid input login guardian type");
+
+    }
 
     [Fact]
     public async Task SocialRecoveryTest_GuardianType()
     {
         await CreateHolderDefault();
         // GuardianType_ is "";
-        var executionResult = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
+        var executionResult = await CaContractStub.SocialRecovery.SendWithExceptionAsync(new SocialRecoveryInput()
         {
             Manager = new Manager
             {
@@ -72,23 +103,16 @@ public partial class CAContractTests : CAContractTestBase
         });
         executionResult.TransactionResult.Error.ShouldContain("invalid input login guardian type");
         
-        //GuardianType_ is null
-        var result = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
-        {
-            Manager = new Manager
-            {
-                ManagerAddress = User2Address,
-                DeviceString = "567"
-            },
-            LoginGuardianType = new GuardianType
-            {
-                Type = 0
-            }
-        });
-        result.TransactionResult.Error.ShouldContain("invalid input login guardian type");
         
-        //type is null
-        var taskResult = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
+    }
+    
+  
+
+    /*[Fact]
+    public async Task SocialRecoveryTest_typeIsNull()
+    {
+        await CreateHolderDefault();
+        var result = await CaContractStub.SocialRecovery.SendWithExceptionAsync(new SocialRecoveryInput()
         {
             Manager = new Manager
             {
@@ -97,23 +121,23 @@ public partial class CAContractTests : CAContractTestBase
             },
             LoginGuardianType = new GuardianType
             {
-                GuardianType_ = "1@google.com"
+                GuardianType_ = "",
             }
         });
-        taskResult.TransactionResult.Error.ShouldContain("invalid input login guardian type");
-    }
+        result.TransactionResult.Error.ShouldContain("invalid input type");
+    }*/
 
     [Fact]
     public async Task SocialRecoveryTest_Manager()
     {
         await CreateHolderDefault();
         //managerAddress  is  null;
-        var taskResult = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
+        await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
         {
             Manager = new Manager
             {
-                ManagerAddress = null,
-                DeviceString = "567"
+                ManagerAddress = User2Address,
+                DeviceString = ""
             },
             LoginGuardianType = new GuardianType
             {
@@ -121,9 +145,21 @@ public partial class CAContractTests : CAContractTestBase
                 Type = 0
             }
         });
-        taskResult.TransactionResult.Error.ShouldContain("invalid input ManagerAddress is null ");
+        
+        await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
+        {
+            Manager = new Manager
+            {
+                ManagerAddress = User2Address,
+            },
+            LoginGuardianType = new GuardianType
+            {
+                GuardianType_ = "1@google.com",
+                Type = 0
+            }
+        });
         //DeviceString is null
-        var result = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
+        /*var result = await CaContractStub.SocialRecovery.SendAsync(new SocialRecoveryInput()
         {
             Manager = new Manager
             {
@@ -151,7 +187,7 @@ public partial class CAContractTests : CAContractTestBase
                 Type = 0
             }
         });
-        executionResult.TransactionResult.Error.ShouldContain("invalid input DeviceString is '' ");
+        executionResult.TransactionResult.Error.ShouldContain("invalid input DeviceString is '' ");*/
 
         
         
@@ -198,6 +234,7 @@ public partial class CAContractTests : CAContractTestBase
         });
         txResult.TransactionResult.Status.ShouldBe(TransactionResultStatus.Mined);
         
+        
         //caHolder not exist
         var notExistedCash = HashHelper.ComputeFrom("Invalid CaHash");
         var txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
@@ -229,9 +266,22 @@ public partial class CAContractTests : CAContractTestBase
         });
         txExecutionResult.TransactionResult.Error.ShouldContain("invalid input manager");
         
-        //input ManagerAddress is null
-        txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
+
+    }
+
+    [Fact]
+    public async Task addManager_invalid_input()
+    {
+        await CreateHolderDefault();
+        var caInfo = await CaContractStub.GetHolderInfo.CallAsync(new GetHolderInfoInput()
         {
+            LoginGuardianType = "1@google.com"
+        });
+        
+        //input ManagerAddress is null
+        var txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
+        {
+            CaHash = caInfo.CaHash, 
             Manager = new Manager()
             {
                 ManagerAddress = null,
@@ -239,18 +289,30 @@ public partial class CAContractTests : CAContractTestBase
             }
         });
         txExecutionResult.TransactionResult.Error.ShouldContain("invalid input manager");
-          
+        
         //inout deviceString is null
         txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
         {
+            CaHash = caInfo.CaHash, 
             Manager = new Manager()
             {
-                ManagerAddress = User2Address,
-                DeviceString = null
+                ManagerAddress = User2Address
             }
         });
         txExecutionResult.TransactionResult.Error.ShouldContain("invalid input manager");
         
+        //inout deviceString is ""
+        txExecutionResult =  await CaContractUser1Stub.AddManager.SendWithExceptionAsync(new AddManagerInput()
+        {
+            CaHash = caInfo.CaHash, 
+            Manager = new Manager()
+            {
+                ManagerAddress = User2Address,
+                DeviceString = ""
+            }
+        });
+        txExecutionResult.TransactionResult.Error.ShouldContain("invalid input manager");
+
         
     }
 
@@ -274,7 +336,7 @@ public partial class CAContractTests : CAContractTestBase
             }
         });
         txExecutionResult.TransactionResult.Error.ShouldContain("CA holder is null.");
-        
+
         //input caHash is null
         txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()
         {
@@ -285,6 +347,45 @@ public partial class CAContractTests : CAContractTestBase
             }
         });
         txExecutionResult.TransactionResult.Error.ShouldContain("invalid input CaHash");
+
+        //input is null
+        /*var managerSendWithExceptionAsync = await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(null);
+        managerSendWithExceptionAsync.TransactionResult.Error.ShouldContain("invalid input");        */
+        
+        //input DeviceString is null
+        txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()
+        {
+            CaHash = caInfo.CaHash,
+            Manager = new Manager()
+            {
+                ManagerAddress = User2Address,
+            }
+        });
+        txExecutionResult.TransactionResult.Error.ShouldContain("invalid input Manager");
+        
+        //input DeviceString is ""
+        txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()
+        {
+            CaHash = caInfo.CaHash,
+            Manager = new Manager()
+            {
+                ManagerAddress = User2Address,
+                DeviceString = ""
+            }
+        });
+        txExecutionResult.TransactionResult.Error.ShouldContain("invalid input Manager");
+
+        //input ManagerAddress is null
+        txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()
+        {
+            CaHash = caInfo.CaHash,
+            Manager = new Manager()
+            {
+                ManagerAddress = null,
+                DeviceString = "iphone14-2022"
+            }
+        });
+        txExecutionResult.TransactionResult.Error.ShouldContain("invalid input Manager");
         
         //input manager is null
         txExecutionResult =  await CaContractUser1Stub.RemoveManager.SendWithExceptionAsync(new RemoveManagerInput()

@@ -12,8 +12,6 @@ public partial class CAContract : CAContractContainer.CAContractBase
 {
     public override Empty Initialize(InitializeInput input)
     {
-        
-        
         Assert(!State.Initialized.Value, "Already initialized.");
         State.Admin.Value = input.ContractAdmin ?? Context.Sender;
         State.TokenContract.Value =

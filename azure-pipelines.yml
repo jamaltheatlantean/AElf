@@ -1,7 +1,4 @@
 # File: azure-pipelines.yml
-trigger:
-  - main
-
 jobs:
   - template: templates/build-template-window.yml
     parameters:

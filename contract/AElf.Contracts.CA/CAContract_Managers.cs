@@ -39,8 +39,8 @@ public partial class CAContract
             }
         }
         
-        Assert(IsRuleSatisfied(guardians.Count, count, holder.JsonExpression), 
-            "invalid input Guardians Approved");
+        // Assert(IsRuleSatisfied(guardians.Count, count, holder.JsonExpression), 
+        //     "invalid input Guardians Approved");
 
         // Manager does not exists
         if (!holder.Managers.Contains(input.Manager))

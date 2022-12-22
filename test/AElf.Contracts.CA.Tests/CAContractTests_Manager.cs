@@ -10,6 +10,10 @@ public partial class CAContractTests : CAContractTestBase
 {
     private async Task CreateHolderDefault()
     {
+        await CaContractStub.Initialize.SendAsync(new InitializeInput
+        {
+            ContractAdmin = DefaultAddress
+        });
         await CaContractStub.CreateCAHolder.SendAsync(new CreateCAHolderInput
         {
             GuardianApproved = new Guardian

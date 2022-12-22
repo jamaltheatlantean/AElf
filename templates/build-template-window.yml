@@ -8,7 +8,7 @@ parameters:
 # Tasks on Windows....
 jobs:
 - job: build_all_windows_${{ parameters.n }}
-  displayName: Build tasks (Windows)
+  displayName: Build tasks (Windows) [${{ parameters.n }} of ${{ parameters.parts }} parts]
   timeoutInMinutes: 120
   pool:
     vmImage: windows-latest

@@ -8,7 +8,7 @@ parameters:
 # All tasks on Linux
 jobs:
 - job: build_all_linux_${{ parameters.n }}
-  displayName: Build tasks (Linux)
+  displayName: Build tasks (Linux) [${{ parameters.n }} of ${{ parameters.parts }} parts]
   timeoutInMinutes: 120
   pool:
     vmImage: ubuntu-latest

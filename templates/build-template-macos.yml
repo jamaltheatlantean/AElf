@@ -8,7 +8,7 @@ parameters:
 # Tasks on macOS
 jobs:
 - job: build_all_darwin_${{ parameters.n }}
-  displayName: Build tasks (macOS)
+  displayName: Build tasks (macOS) [${{ parameters.n }} of ${{ parameters.parts }} parts]
   timeoutInMinutes: 120
   pool:
     vmImage: macos-latest

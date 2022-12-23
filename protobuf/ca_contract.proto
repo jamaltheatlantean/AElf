@@ -7,6 +7,8 @@ package ca;
 
 import "aelf/core.proto";
 import "aelf/options.proto";
+import "acs1.proto";
+import "authority_info.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -14,6 +16,7 @@ option csharp_namespace = "AElf.Contracts.CA";
 
 service CAContract {
   option (aelf.csharp_state) = "AElf.Contracts.CA.CAContractState";
+  option (aelf.base) = "acs1.proto";
   
   rpc Initialize(InitializeInput) returns (google.protobuf.Empty){}
   

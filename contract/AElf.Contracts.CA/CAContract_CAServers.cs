@@ -10,6 +10,7 @@ public partial class CAContract
 {
     public override Empty AddCAServer(AddCAServerInput input)
     {
+        
         Assert(Context.Sender == State.Admin.Value,"No permission.");
         Assert(!String.IsNullOrEmpty(input.Name) && !String.IsNullOrEmpty(input.EndPoints),"Invalid input.");
         Assert(input.Name != "" && input.EndPoints != "","Invalid input.");

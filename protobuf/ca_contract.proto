@@ -84,6 +84,8 @@ service CAContract {
   rpc ValidateCAHolderInfoWithManagersExists(ValidateCAHolderInfoWithManagersExistsInput) returns (google.protobuf.Empty) {}
   
   rpc SyncHolderInfo (SyncHolderInfoInput) returns (google.protobuf.Empty) {}
+  
+  rpc Hello(google.protobuf.Empty) returns (StrategyNode){}
 }
 
 message InitializeInput{
@@ -150,6 +152,7 @@ message CAServer {
   string name = 1;
   string endPoint = 2;
 }
+
 
 message VerifierServerList {
   repeated VerifierServer verifierServers = 1;
@@ -429,4 +432,10 @@ message CAServerAdded {
 message CAServerRemoved {
   option (aelf.is_event) = true;
   CAServer ca_server_removed = 1;
+}
+
+
+message StrategyNode{
+  string Name = 1;
+  repeated bytes Value = 2;
 }

@@ -9,6 +9,7 @@ namespace AElf.Contracts.CA;
 // And the rules are in forms of json, which can be parsed can verified easily.
 public partial class CAContract
 {
+    
     private int ParseInt(string jsonText)
     {
         if (jsonText == CAContractConstants.IntMAX)
@@ -18,6 +19,8 @@ public partial class CAContract
 
         return int.Parse(jsonText);
     }
+    
+    
 
     private string GetParameters(object obj, int i)
     {
@@ -62,7 +65,7 @@ public partial class CAContract
         }
     }
 
-    private bool IsRuleSatisfied(int guardianCount, int guardianApprovedCount, string jsonGuardianRule)
+    /*private bool IsRuleSatisfied(int guardianCount, int guardianApprovedCount, string jsonGuardianRule)
     {
         bool result = false;
         
@@ -91,18 +94,18 @@ public partial class CAContract
         }
 
         return result;
-    }
+    }*/
 
 
-    private bool AndOperation(int guardianCount, int guardianApprovedCount, string jsonText1, string jsonText2)
+    /*private bool AndOperation(int guardianCount, int guardianApprovedCount, string jsonText1, string jsonText2)
     {
         var result1 = RecursionOperation(guardianCount, guardianApprovedCount, Context.ParseJsonToPlainDictionary(jsonText1));
         var result2 = RecursionOperation(guardianCount, guardianApprovedCount, Context.ParseJsonToPlainDictionary(jsonText2));
 
         return result1 && result2;
-    }
+    }*/
 
-    private bool OrOperation(int guardianCount, int guardianApprovedCount, string jsonText1, string jsonText2)
+    /*private bool OrOperation(int guardianCount, int guardianApprovedCount, string jsonText1, string jsonText2)
     {
         var result1 = RecursionOperation(guardianCount, guardianApprovedCount, Context.ParseJsonToPlainDictionary(jsonText1));
         var result2 = RecursionOperation(guardianCount, guardianApprovedCount, Context.ParseJsonToPlainDictionary(jsonText2));
@@ -114,9 +117,9 @@ public partial class CAContract
     {
         return !RecursionOperation(guardianCount, guardianApprovedCount, Context.ParseJsonToPlainDictionary(jsonText));
 
-    }
+    }*/
     
-    private bool RecursionOperation(int guardianCount, int guardianApprovedCount, Dictionary<string, object> dict)
+    /*private bool RecursionOperation(int guardianCount, int guardianApprovedCount, Dictionary<string, object> dict)
     {
         if (dict.ContainsKey(CAContractConstants.Rule))
         {
@@ -139,15 +142,96 @@ public partial class CAContract
         }
 
         return false;
-    }
+    }*/
 
-    private bool AreRulesSatisfied(int guardianCount, int guardianApprovedCount, string jsonGuardianRules)
+    /*private bool AreRulesSatisfied(int guardianCount, int guardianApprovedCount, string jsonGuardianRules)
     {
         var dict = Context.ParseJsonToPlainDictionary(jsonGuardianRules);
 
         return RecursionOperation(guardianCount, guardianApprovedCount, dict);
+    }*/
+    
+    public class StrategyContext
+    {
+        public int CurrentValidator { get; set; } = 1;
+        public string Id { get; set; }
+    }
+
+    public abstract class Strategy
+    {
+        public abstract bool Validate(StrategyContext context);
+        public abstract Strategy Parse(StrategyNode node);
+        public abstract StrategyNode ToStrategyNode();
+        
     }
     
-    
-    
+    /*public class BiggerThanStrategy : Strategy
+    {
+        private BiggerThanParameters Parameters { get; set; }
+
+        public override bool Validate(StrategyContext context)
+        {
+            return true;
+        }
+
+        public override Strategy Parse(StrategyNode node)
+        {
+            Parameters.MergeFrom(node.Value);
+            return this;
+        }
+
+        public override StrategyNode ToStrategyNode()
+        {
+            return new StrategyNode()
+            {
+                Name = nameof(BiggerThanStrategy),
+                Value = Parameters.ToByteString()
+            };
+        }
+    }
+
+    public class AndStrategy : Strategy
+    {
+        public Strategy One { get; set; }
+        public Strategy Two { get; set; }
+
+        public override bool Validate(StrategyContext context)
+        {
+            return One.Validate(context) && Two.Validate(context);
+        }
+
+        public override Strategy Parse(StrategyNode node)
+        {
+            One = StrategyFactory.Create(node.Value[0]);
+            Two = StrategyFactory.Create(node.Value[0]);
+            return this;
+        }
+
+        public override StrategyNode ToStrategyNode()
+        {
+            return new StrategyNode()
+            {
+                Name = nameof(AndStrategy),
+                Value = { One.ToStrategyNode(), Two.ToStrategyNode() }
+            };
+        }
+
+        public class StrategyFactory
+        {
+            public static Strategy Create(StrategyNode node)
+            {
+                switch (node.Name)
+                {
+                    case "And":
+                        return new AndStrategy().Parse(node);
+
+                    case "BiggerThan":
+                        return new BiggerThanStrategy().Parse(node);
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+    }*/
+
 }

@@ -39,8 +39,8 @@ public partial class CAContract
         CheckVerifierSignatureAndData(input.GuardianToAdd);
 
         //Whether the approved guardians count is satisfied.
-        Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
-            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");
+        /*Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
+            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");*/
 
         foreach (var guardian in input.GuardiansApproved)
         {
@@ -94,8 +94,8 @@ public partial class CAContract
         CheckVerifierSignatureAndData(toRemoveGuardian);
 
         //Whether the approved guardians count is satisfied.
-        Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
-            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");
+        /*Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
+            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");*/
 
         foreach (var guardian in input.GuardiansApproved)
         {
@@ -153,8 +153,8 @@ public partial class CAContract
         CheckVerifierSignatureAndData(input.GuardianToUpdateNew);
 
         //Whether the approved guardians count is satisfied.
-        Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
-            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");
+        /*Assert(AreRulesSatisfied(holderInfo.GuardiansInfo.Guardians.Count, input.GuardiansApproved.Count,
+            holderInfo.JsonExpression), "The number of approved guardians does not satisfy the rules.");*/
 
         foreach (var guardian in input.GuardiansApproved)
         {
@@ -187,7 +187,7 @@ public partial class CAContract
         var verifierData = HashHelper.ConcatAndCompute(HashHelper.ComputeFrom(guardian.Verifier.VerificationTime),
             HashHelper.ComputeFrom(guardian.Verifier.VerifierAddress));
         var data = HashHelper.ConcatAndCompute(guardianTypeData, verifierData);
-        var publicKey = Context.RecoverPublicKeyWithArgs(verifier.Signature.ToByteArray(),
+        var publicKey = Context.RecoverPublicKey(verifier.Signature.ToByteArray(),
             data.ToByteArray());
         var verifierAddress = Address.FromPublicKey(publicKey);
         Assert( verifierAddress == verifier.VerifierAddress, "Verification failed.");

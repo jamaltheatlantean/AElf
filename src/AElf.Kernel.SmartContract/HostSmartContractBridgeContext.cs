@@ -180,7 +180,6 @@ public class HostSmartContractBridgeContext : IHostSmartContractBridgeContext, I
     public Address Origin => TransactionContext.Origin.Clone();
     public Hash OriginTransactionId => TransactionContext.OriginTransactionId;
     public long CurrentHeight => TransactionContext.BlockHeight;
-    public long TransactionRefBlockNumber => TransactionContext.Transaction.RefBlockNumber;
     public Timestamp CurrentBlockTime => TransactionContext.CurrentBlockTime;
     public Hash PreviousBlockHash => TransactionContext.PreviousBlockHash.Clone();
 
@@ -193,49 +192,7 @@ public class HostSmartContractBridgeContext : IHostSmartContractBridgeContext, I
         return RecoverPublicKey(TransactionContext.Transaction.Signature.ToByteArray(),
             TransactionContext.Transaction.GetHash().ToByteArray());
     }
-
-    public byte[] RecoverPublicKeyWithArgs(byte[] signature, byte[] hash)
-    {
-        return RecoverPublicKey(signature, hash);
-    }
-
-    public Dictionary<string, object> ParseJsonToPlainDictionary(string jsonText)
-    {
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonText));
-
-        var options = new JsonSerializerOptions 
-        { 
-            PropertyNameCaseInsensitive = true,
-            NumberHandling = JsonNumberHandling.WriteAsString 
-        };
-
-        var resultDict = JsonSerializer.Deserialize<Dictionary<string, object>>(stream, options);
-        // No System.Text.Json object can be returned, because this package is invalid in contract environment.
-        // So we need to transform all json object to basic ones, such as, number, string, boolean...
-        foreach (var (key, value) in resultDict)
-        {
-            if (value is JsonElement)
-            {
-                JsonElement element = (JsonElement)value;
-                if (element.ValueKind == JsonValueKind.Array)
-                {
-                    var list = new List<string>();
-                    foreach (var item in element.EnumerateArray())
-                    {
-                        list.Add(item.ToString());
-                    }
-
-                    resultDict[key] = list;
-                }
-                else
-                {
-                    resultDict[key] = element.ToString();
-                }
-            }
-        }
-        return resultDict;
-    }
-
+    
     public T Call<T>(Address fromAddress, Address toAddress, string methodName, ByteString args)
         where T : IMessage<T>, new()
     {
@@ -366,7 +323,7 @@ public class HostSmartContractBridgeContext : IHostSmartContractBridgeContext, I
         AsyncHelper.RunSync(() => _smartContractBridgeService.UpdateContractAsync(contractDto));
     }
 
-    private byte[] RecoverPublicKey(byte[] signature, byte[] hash)
+    public byte[] RecoverPublicKey(byte[] signature, byte[] hash)
     {
         var cabBeRecovered = CryptoHelper.RecoverPublicKey(signature, hash, out var publicKey);
         return !cabBeRecovered ? null : publicKey;

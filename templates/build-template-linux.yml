@@ -12,8 +12,6 @@ jobs:
   timeoutInMinutes: 120
   pool:
     vmImage: ubuntu-latest
-  variables:
-    CI_TEST: true
   steps:
     - task: UseDotNet@2
       displayName: 'Install .NET Core SDK'

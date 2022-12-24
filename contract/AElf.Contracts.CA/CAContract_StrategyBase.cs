@@ -20,6 +20,32 @@ public partial class CAContract
         {
             if (!asserted) throw new AssertionException(message);
         }
+
+        public static Strategy DefaultStrategy()
+        {
+            return new CAContract.IfElseStrategy()
+            {
+                IfCondition = new CAContract.LargerThanStrategy()
+                {
+                    One = CAContractConstants.GuardianCount,
+                    Two = 4
+                },
+                Than = new CAContract.NotLessThanStrategy()
+                {
+                    One = CAContractConstants.GuardianApprovedCount,
+                    Two = CAContractConstants.GuardianCount
+                },
+                Else = new CAContract.NotLessThanStrategy()
+                {
+                    One = CAContractConstants.GuardianApprovedCount,
+                    Two = new CAContract.RatioOfCountCalculationStrategy()
+                    {
+                        One = CAContractConstants.GuardianCount,
+                        Two = 6000
+                    }
+                }
+            };
+        }
     }
 
     public abstract class UnaryBooleanStrategy : Strategy

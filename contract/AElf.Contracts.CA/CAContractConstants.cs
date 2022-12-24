@@ -10,29 +10,6 @@ public static class CAContractConstants
     public const int LoginGuardianTypeIsYours = 2;
     public const int SecondsForOneDay = 86400; // 24*60*60
 
-    // public static readonly CAContract.Strategy GeneralGuardianStrategy = new CAContract.IfElseStrategy()
-    // {
-    //     IfCondition = new CAContract.LargerThanStrategy()
-    //     {
-    //         One = GuardianCount,
-    //         Two = 4
-    //     },
-    //     Than = new CAContract.NotLessThanStrategy()
-    //     {
-    //         One = GuardianApprovedCount,
-    //         Two = GuardianCount
-    //     },
-    //     Else = new CAContract.NotLessThanStrategy()
-    //     {
-    //         One = GuardianApprovedCount,
-    //         Two = new CAContract.RatioOfCountCalculationStrategy()
-    //         {
-    //             One = GuardianCount,
-    //             Two = 6000
-    //         }
-    //     }
-    // };
-
     public const string Rule = "rule";
     public const string And = "&&";
     public const string Or = "||";

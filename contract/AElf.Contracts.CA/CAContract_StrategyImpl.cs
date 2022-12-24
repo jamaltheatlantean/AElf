@@ -109,10 +109,10 @@
 //     protected override Func<long, long, bool> Compare { get => (one, two) => one != two; }
 // }
 //
-// public class RatioByTenThousand : BinaryNumericCompareStrategy
+// public class RatioOfCountCalculationStrategy : BinaryNumericCalculateStrategy
 // {
 //     public override string StrategyName { get => CAContractConstants.RatioByTenThousand; }
-//     protected override Func<long, long, bool> Compare { get => (one, two) => one != two; }
+//     protected override Func<long, long, bool> Compare { get => (one, two) => one * two / CAContractConstants.TenThousand + 1; }
 // }
 //
 //

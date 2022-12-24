@@ -25,7 +25,11 @@ public static class CAContractConstants
     //     Else = new CAContract.NotLessThanStrategy()
     //     {
     //         One = GuardianApprovedCount,
-    //         
+    //         Two = new CAContract.RatioOfCountCalculationStrategy()
+    //         {
+    //             One = GuardianCount,
+    //             Two = 6000
+    //         }
     //     }
     // };
 
@@ -48,7 +52,7 @@ public static class CAContractConstants
     public const string GuardianApprovedCount = "guardianApprovedCount";
     public const string GuardianCount = "guardianCount";
 
-    public const int TenThousand = 10000;
+    public const long TenThousand = 10000;
 
     public const string ELFTokenSymbol = "ELF";
     public const int CADelegationAmount = 100000000;

@@ -57,9 +57,9 @@ public partial class CAContract : CAContractContainer.CAContractBase
                 Guardians = {input.GuardianApproved},
                 LoginGuardianTypeIndexes = {0}
             };
-            holderInfo.JsonExpression = string.IsNullOrEmpty(input.JsonGuardianRules)
-                ? CAContractConstants.GeneralJsonGuardianRules
-                : input.JsonGuardianRules;
+            // holderInfo.JsonExpression = string.IsNullOrEmpty(input.JsonGuardianRules)
+            //     ? CAContractConstants
+            //     : input.JsonGuardianRules;
 
             State.HolderInfoMap[holderId] = holderInfo;
             State.LoginGuardianTypeMap[guardianType?.GuardianType_] = holderId;

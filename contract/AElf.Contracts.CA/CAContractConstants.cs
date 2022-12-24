@@ -9,43 +9,42 @@ public static class CAContractConstants
     public const int LoginGuardianTypeIsNotOccupied = 1;
     public const int LoginGuardianTypeIsYours = 2;
     public const int SecondsForOneDay = 86400; // 24*60*60
-    public const string GeneralJsonGuardianRules = @"
-    {
-        ""||"": [{
-            ""rule"": {
-                ""minGuardianCount"": ""1"",
-                ""maxGuardianCount"": ""4"",
-                ""parameters"": [
-                    ""largerThan"",
-                    ""guardianApprovedCount"",
-                    ""guardianCount""
-                ]
-            }
-        }, {
-            ""rule"": {
-                ""minGuardianCount"": ""4"",
-                ""maxGuardianCount"": ""int.Max"",
-                ""parameters"": [
-                    ""roundDown"",
-                    ""guardianApprovedCount"",
-                    ""guardianCount"",
-                    ""6000"",
-                    ""1""]
-            }
-        }]
-    }";
+
+    // public static readonly CAContract.Strategy GeneralGuardianStrategy = new CAContract.IfElseStrategy()
+    // {
+    //     IfCondition = new CAContract.LargerThanStrategy()
+    //     {
+    //         One = GuardianCount,
+    //         Two = 4
+    //     },
+    //     Than = new CAContract.NotLessThanStrategy()
+    //     {
+    //         One = GuardianApprovedCount,
+    //         Two = GuardianCount
+    //     },
+    //     Else = new CAContract.NotLessThanStrategy()
+    //     {
+    //         One = GuardianApprovedCount,
+    //         
+    //     }
+    // };
 
     public const string Rule = "rule";
     public const string And = "&&";
     public const string Or = "||";
     public const string Not = "!";
+    public const string IfElse = "ifElse";
+    public const string LargerThan = ">";
+    public const string NotLargerThan = "<=";
+    public const string LessThan = "<";
+    public const string NotLessThan = ">=";
+    public const string Equal = "==";
+    public const string NotEqual = "!=";
+    public const string RatioByTenThousand = "ratioByTenThousand";
     
-    public const string MinGuardianCount = "minGuardianCount";
-    public const string MaxGuardianCount = "maxGuardianCount";
     public const string IntMAX = "int.Max";
     public const string Parameters = "parameters";
-    public const string LargerThan = "largerThan";
-    public const string RoundDown = "roundDown";
+
     public const string GuardianApprovedCount = "guardianApprovedCount";
     public const string GuardianCount = "guardianCount";
 
